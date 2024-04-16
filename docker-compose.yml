@@ -4,7 +4,6 @@
 
 # Minimal `$ docker compose` configuration to show the requirements for running
 # project-structure in containers.
-version: "3.8"
 
 services:
   ## Container for use by end users:
