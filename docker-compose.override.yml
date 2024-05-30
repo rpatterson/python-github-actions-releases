@@ -17,7 +17,9 @@ services:
     environment:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "src_project_structure"
+        target: "/usr/local/src/project-structure/"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       hadolint "./Dockerfile"
@@ -30,7 +32,9 @@ services:
     environment:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "src_project_structure"
+        target: "/usr/local/src/project-structure/"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       lint
@@ -43,7 +47,9 @@ services:
     environment:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure"
+      - type: "volume"
+        source: "src_project_structure"
+        target: "/usr/local/src/project-structure/"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       .
@@ -64,7 +70,9 @@ services:
     privileged: true
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "src_project_structure"
+        target: "/usr/local/src/project-structure/"
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/init-job.sh\
         :/usr/local/bin/init-job.sh"
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/entrypoint.sh\
@@ -88,3 +96,13 @@ services:
       # DEBUG: "true"
     command: >-
       make -j -O release-all
+
+volumes:
+
+  src_project_structure:
+    name: "src_project_structure"
+    driver: "local"
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${CHECKOUT_DIR:-.}/"
