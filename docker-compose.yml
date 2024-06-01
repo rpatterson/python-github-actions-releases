@@ -22,27 +22,35 @@ services:
     volumes:
       # Preserve user configuration, data, and caches between containers and variants:
       - type: "volume"
-        source: "project_home"
-        target: "/home/project-structure"
-        volume:
-          subpath: "./.config/"
+        source: "home_config"
+        target: "/home/project-structure/.config"
       - type: "volume"
-        source: "project_home"
-        target: "/home/project-structure"
-        volume:
-          subpath: "./.local/share/"
+        source: "home_local_share"
+        target: "/home/project-structure/.local/share"
       - type: "volume"
-        source: "project_home"
-        target: "/home/project-structure"
-        volume:
-          subpath: "./.cache/"
+        source: "home_cache"
+        target: "/home/project-structure/.cache"
 
 volumes:
   # Share user `${HOME}` data between services but isolated within the project:
-  project_home:
-    name: "${PROJECT_NAME:-project-structure}_home"
+  home_config:
+    name: "home_config"
     driver: "local"
     driver_opts:
       type: "none"
       o: "bind"
-      device: "${CHECKOUT_DIR:-.}/home/"
+      device: "${CHECKOUT_DIR:-.}/home/.config/"
+  home_local_share:
+    name: "home_local_share"
+    driver: "local"
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${CHECKOUT_DIR:-.}/home/.local/share/"
+  home_cache:
+    name: "home_cache"
+    driver: "local"
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${CHECKOUT_DIR:-.}/home/.cache/"
