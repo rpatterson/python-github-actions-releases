@@ -18,7 +18,7 @@ services:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
       - type: "volume"
-        source: "src_project_structure"
+        source: "project_structure_src"
         target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
@@ -33,7 +33,7 @@ services:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
       - type: "volume"
-        source: "src_project_structure"
+        source: "project_structure_src"
         target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
@@ -48,7 +48,7 @@ services:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
       - type: "volume"
-        source: "src_project_structure"
+        source: "project_structure_src"
         target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
@@ -71,7 +71,7 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - type: "volume"
-        source: "src_project_structure"
+        source: "project_structure_src"
         target: "/usr/local/src/project-structure"
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/init-job.sh\
         :/usr/local/bin/init-job.sh"
@@ -98,8 +98,8 @@ services:
       make -j -O release-all
 
 volumes:
-  src_project_structure:
-    name: "src_project_structure"
+  project_structure_src:
+    name: "${PROJECT_NAME:-project-structure}_src"
     driver: "local"
     driver_opts:
       type: "none"
