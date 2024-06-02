@@ -1,18 +1,18 @@
 #!/bin/ash
+#
+# Perform any set up only needed one time per CI job then delegate to `argv`.
 
 # SPDX-FileCopyrightText: 2023 Ross Patterson <me@rpatterson.net>
 #
 # SPDX-License-Identifier: MIT
 
-# Perform any set up only needed one time per CI job then delegate to `argv`.
-
 set -eu -o pipefail
+export PS4='+$(basename "${0}"):${LINENO}+'
 CHOWN_ARGS=""
 if test "${DEBUG:=false}" = "true"
 then
     # Echo commands for easier debugging
     set -x
-    PS4='${0}:${LINENO}+'
     CHOWN_ARGS="${CHOWN_ARGS} -c"
 fi
 
