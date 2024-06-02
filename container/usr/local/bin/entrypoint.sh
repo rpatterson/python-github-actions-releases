@@ -1,20 +1,20 @@
 #!/bin/bash
+#
+# Perform any required volatile run time initialization
 
 # SPDX-FileCopyrightText: 2023 Ross Patterson <me@rpatterson.net>
 #
 # SPDX-License-Identifier: MIT
 
-# Perform any required volatile run time initialization.
-
 set -eu -o pipefail
 shopt -s inherit_errexit
 CHOWN_ARGS=""
 ADDUSER_ARGS="--quiet"
+export PS4='+$(basename "${0}"):${LINENO}+'
 if test "${DEBUG:=false}" = "true"
 then
     # Echo commands for easier debugging
     set -x
-    PS4='$0:$LINENO+'
     CHOWN_ARGS+="-c"
     ADDUSER_ARGS=""
 fi
