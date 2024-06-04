@@ -26,6 +26,11 @@ Required
 High priority
 ****************************************************************************************
 
+#. Audit ``$ make -j devel-upgrade-branch`` to re-use existing images and otherwise
+   reduce runtime as much as possible so that new CI jobs that build images are only run
+   when upgrades actually change versions. See if that's enough to run it daily without
+   exhausting GitLab's free monthly CI minutes.
+
 #. Any documentation improvements:
 
    Docs benefit most from fresh eyes. If you find anything confusing, ask for help. When
