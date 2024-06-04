@@ -19,7 +19,7 @@ services:
     volumes:
       - type: "volume"
         source: "src_project_structure"
-        target: "/usr/local/src/project-structure/"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       hadolint "./Dockerfile"
@@ -34,7 +34,7 @@ services:
     volumes:
       - type: "volume"
         source: "src_project_structure"
-        target: "/usr/local/src/project-structure/"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       lint
@@ -49,7 +49,7 @@ services:
     volumes:
       - type: "volume"
         source: "src_project_structure"
-        target: "/usr/local/src/project-structure/"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       .
@@ -72,7 +72,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - type: "volume"
         source: "src_project_structure"
-        target: "/usr/local/src/project-structure/"
+        target: "/usr/local/src/project-structure"
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/init-job.sh\
         :/usr/local/bin/init-job.sh"
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/entrypoint.sh\
@@ -98,7 +98,6 @@ services:
       make -j -O release-all
 
 volumes:
-
   src_project_structure:
     name: "src_project_structure"
     driver: "local"
