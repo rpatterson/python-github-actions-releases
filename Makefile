@@ -857,7 +857,7 @@ ifeq ($(RELEASE_PUBLISH),true)
 	true "TEMPLATE: Always specific to the project type"
 	export VERSION=$$(tox exec -e "build" -qq -- cz version --project)
 # Create a GitLab release
-	release_cli_args="--description ./NEWS-VERSION.rst"
+	release_cli_args="--description ./docs/news-version.rst"
 	release_cli_args+=" --tag-name v$${VERSION}"
 	release_cli_args+=" --assets-link {\
 	\"name\":\"Docker-Hub-Container-Registry\",\
@@ -870,7 +870,7 @@ ifeq ($(RELEASE_PUBLISH),true)
 	    create $${release_cli_args}
 # Create a GitHub release
 	gh release create "v$${VERSION}" $(GITHUB_RELEASE_ARGS) \
-	    --notes-file "./NEWS-VERSION.rst" ./dist/project?structure-*
+	    --notes-file "./docs/news-version.rst" ./dist/project?structure-*
 endif
 
 .PHONY: release-docker
