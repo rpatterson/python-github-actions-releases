@@ -4,7 +4,6 @@
 
 # Minimal `$ docker compose` configuration to show the requirements for running
 # project-structure in containers.
-version: "3.8"
 
 services:
   ## Container for use by end users:
@@ -22,6 +21,35 @@ services:
     restart: "unless-stopped"
     volumes:
       # Preserve user configuration, data, and caches between containers and variants:
-      - "${CHECKOUT_DIR:-.}/home/.config/:/home/project-structure/.config/"
-      - "${CHECKOUT_DIR:-.}/home/.local/share/:/home/project-structure/.local/share/"
-      - "${CHECKOUT_DIR:-.}/home/.cache/:/home/project-structure/.cache/"
+      - type: "volume"
+        source: "home_config"
+        target: "/home/project-structure/.config"
+      - type: "volume"
+        source: "home_local_share"
+        target: "/home/project-structure/.local/share"
+      - type: "volume"
+        source: "home_cache"
+        target: "/home/project-structure/.cache"
+
+volumes:
+  home_config:
+    name: "home_config"
+    driver: "local"
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${CHECKOUT_DIR:-.}/home/.config/"
+  home_local_share:
+    name: "home_local_share"
+    driver: "local"
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${CHECKOUT_DIR:-.}/home/.local/share/"
+  home_cache:
+    name: "home_cache"
+    driver: "local"
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${CHECKOUT_DIR:-.}/home/.cache/"
