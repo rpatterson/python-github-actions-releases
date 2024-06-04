@@ -130,7 +130,7 @@ services:
     volumes:
       - type: "volume"
         source: "checkout"
-        target: "/data"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     entrypoint: "ash"
     # Strip reStructuredText directives unsupported in Markdown before converting, for
@@ -156,7 +156,7 @@ services:
     volumes:
       - type: "volume"
         source: "checkout"
-        target: "/data"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       --file "./var/README.md"
