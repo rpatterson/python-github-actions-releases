@@ -317,7 +317,7 @@ build-docs-devhelp: ./.tox/$(PYTHON_HOST_ENV)/.tox-info.json
 $(DOCS_SPHINX_BUILDERS:%=build-docs-%): ./.tox/$(PYTHON_HOST_ENV)/.tox-info.json \
 		build-docs-devhelp $(HOST_PREFIX)/bin/convert
 	"$(<:%/.tox-info.json=%/bin/sphinx-build)" -b "$(@:build-docs-%=%)" -Wn \
-	    -j "auto" -D autosummary_generate="0" -D autoapi_generate_api_docs="0" \
+	    -j "auto" -D autoapi_generate_api_docs="0" \
 	    "./docs/" "./build/docs/$(@:build-docs-%=%)/"
 .PHONY: build-docs-pdf
 ## Render the LaTeX documentation into a PDF file.
