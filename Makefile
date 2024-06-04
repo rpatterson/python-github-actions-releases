@@ -1529,7 +1529,7 @@ GPG_SIGNING_PRIVATE_KEY?=
 	mkdir -pv "$(dir $(@))"
 ifneq ($(and $(GPG_SIGNING_PRIVATE_KEY),$(GPG_PASSPHRASE)),)
 	printenv "GPG_SIGNING_PRIVATE_KEY" | gpg --batch --import | tee -a "$(@)"
-	echo 'default-key:0:"$(GPG_SIGNING_KEYID)' | gpgconf —change-options gpg
+	echo 'default-key:0:"$(GPG_SIGNING_KEYID)' | gpgconf --change-options gpg
 	git config --global user.signingkey "$(GPG_SIGNING_KEYID)"
 # "Unlock" the signing key for the rest of this CI run:
 	printenv 'GPG_PASSPHRASE' >"./var/ci-cd-signing-subkey.passphrase"
