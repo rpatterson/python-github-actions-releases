@@ -31,6 +31,11 @@ Required
 High priority
 ****************************************************************************************
 
+#. Audit ``$ make -j devel-upgrade-branch`` to re-use existing images and otherwise
+   reduce runtime as much as possible so that new CI jobs that build images are only run
+   when upgrades actually change versions. See if that's enough to run it daily without
+   exhausting GitLab's free monthly CI minutes.
+
 #. Any documentation improvements:
 
    Docs benefit most from fresh eyes. If you find anything confusing, ask for help. When
@@ -99,13 +104,13 @@ Nice to have
    changing the ``platform: ...`` in ``./docker-compose*.yml`` requires a ``$ docker
    compose pull ...`` to switch the image. This means pulling again and again some time
    after the push increasingly the likelihood of pulling an image other than the one
-   built locally. This leaves a couple options. Parse the build output to extract the
-   manifest digest and then use that to retrieve the digests for each platform's image
-   and then use those digests in ``./docker-compose*.yml``. Or output the multi-platform
-   image to one of the local filesystem formats, figure how to import from there and do
-   a similar dance to retrieve and use the digests. This would be fragile and would take
-   a lot of work that is likely wasted effort when Docker or someone else provides a
-   better way. IOW, these options would mean wastefully fighting tools and frameworks.
+   built locally. This leaves a couple options. Parse the manifest digest from the build
+   output and then use that to retrieve the digests for each platform's image and then
+   use those digests in ``./docker-compose*.yml``. Or output the multi-platform image to
+   one of the local filesystem formats, figure how to import from there and do a similar
+   dance to retrieve and use the digests. This would be fragile and would take a lot of
+   work that is likely wasted effort when Docker or someone else provides a better
+   way. IOW, these options would mean wastefully fighting tools and frameworks.
 
    As such, this probably isn't worth the effort until users report significant
    platform-specific bugs.
