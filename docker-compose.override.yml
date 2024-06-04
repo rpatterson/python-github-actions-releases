@@ -71,8 +71,8 @@ services:
       # Avoid any clashes between image variants and the local host at both build and
       # runtime.
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian}/\
-        :/usr/local/src/project-structure/${WORKTREE_REL:-}/var/"
-    working_dir: "/usr/local/src/project-structure/${WORKTREE_REL:-}"
+        :/usr/local/src/project-structure${WORKTREE_REL:-}/var/"
+    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
 
   # https://github.com/hadolint/hadolint#how-to-use
   hadolint:
@@ -131,7 +131,7 @@ services:
       - type: "volume"
         source: "checkout"
         target: "/data"
-    working_dir: "/usr/local/src/project-structure/${WORKTREE_REL:-}"
+    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     entrypoint: "ash"
     # Strip reStructuredText directives unsupported in Markdown before converting, for
     # example table of contents, and converted Markdown that isn't widely supported, for
@@ -157,7 +157,7 @@ services:
       - type: "volume"
         source: "checkout"
         target: "/data"
-    working_dir: "/usr/local/src/project-structure/${WORKTREE_REL:-}"
+    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       --file "./var/README.md"
       --short "Project structure foundation or template"
@@ -175,7 +175,7 @@ services:
       - type: "volume"
         source: "checkout"
         target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure/${WORKTREE_REL:-}"
+    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
 
   ## Containers for simulating CI/CD:
 
