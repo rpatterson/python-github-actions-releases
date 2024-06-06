@@ -34,7 +34,8 @@ main() {
 
 	# Ensure the home directory in the image has the correct permissions. Change
 	# permissions selectively to avoid time-consuming recursion:
-	chown ${CHOWN_ARGS} -R "${PUID}:${PGID}" "/home/${PROJECT_NAME}/"
+	chown ${CHOWN_ARGS} "${PUID}:${PGID}" "/home/${PROJECT_NAME}/" \
+	      /home/${PROJECT_NAME}/.??* /home/${PROJECT_NAME}/.local/*
 
         # Add an unprivileged user:
         if ! getent group "${PGID}" >"/dev/null"
