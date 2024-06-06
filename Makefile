@@ -714,7 +714,7 @@ endif
 ./var/log/git-ls-files.log: ./var-host/log/make-runs/$(MAKE_RUN_UUID).log
 	mkdir -pv "$(dir $(@))"
 	git ls-files >"$(@).~new~"
-	if diff -u "$(@)" "$(@).~new~"
+	if diff --color -u "$(@)" "$(@).~new~"
 	then
 	    exit
 	fi
@@ -866,7 +866,7 @@ if test ! -e "$(2:%.~out~=%)"
 then
     touch -d "@0" "$(2:%.~out~=%)"
 fi
-envsubst <"$(1)" | diff -u "$(2:%.~out~=%)" "-" || true
+envsubst <"$(1)" | diff --color -u "$(2:%.~out~=%)" "-" || true
 set +x
 echo "WARNING:Template $(1) changed, reconcile and \`$$ touch $(2:%.~out~=%)\`."
 set -x
