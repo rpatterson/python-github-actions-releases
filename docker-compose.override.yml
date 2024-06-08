@@ -99,7 +99,7 @@ services:
 
 volumes:
   checkout:
-    name: "${PROJECT_NAME:-project-structure}_checkout"
+    name: "project_structure_checkout"
     driver: "local"
     driver_opts:
       type: "none"
