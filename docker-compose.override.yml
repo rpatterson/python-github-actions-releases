@@ -29,7 +29,7 @@ services:
       :devel-${DOCKER_VARIANT:-debian}-${DOCKER_BRANCH_TAG:-develop}"
     container_name: "project-structure-devel"
     profiles:
-      - "test"
+      - "devel"
     build:
       context: "./"
       target: "devel"
