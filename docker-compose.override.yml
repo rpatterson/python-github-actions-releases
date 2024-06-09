@@ -22,7 +22,7 @@ services:
         target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
-      hadolint "./Dockerfile"
+      hadolint "./build-host/Dockerfile"
 
   reuse:
     image: "docker.io/fsfe/reuse${DOCKER_REUSE_DIGEST:-:latest-debian}"
