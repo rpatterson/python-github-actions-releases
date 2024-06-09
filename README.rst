@@ -3,7 +3,7 @@
 .. SPDX-License-Identifier: MIT
 
 .. image:: ./docs/_static/logo-120.png
-.. include-above-contents-start
+.. include-before-contents-start
 
 ########################################################################################
 Project Structure
@@ -71,9 +71,9 @@ variants. Real projects can also merge those changes.
 .. _`Organize source by feature`:
    https://www.seancdavis.com/posts/organize-components-by-keeping-related-files-close/
 
-.. include-above-contents-end
+.. include-before-contents-end
 .. contents:: Table of Contents
-.. include-below-contents-start
+.. include-after-contents-start
 
 
 ****************************************************************************************
