@@ -9,7 +9,7 @@ action:
 swap:
   "(?<!,| in| on| at| to| for| from| of| with| without| against) which": ", which| that"
   "(?<!.-)jar": compress|archive
-  "(?<![Bb]y) using": by using|that uses
+  "(?<![Bb]y |not |are |to |about |[Ww]hen )using": by using|that uses
   ", that": ", which| that"
   "[Bb]are metal(?= clusters?| compute| configuration| controls?| environments?| equipment| events?| hardware| hosts?| infrastructure| installations?| installers?| machines?| media| nodes?| provisioning| servers?| workers?)": bare-metal
   "[Bb]are-metal(?! clusters?| compute| configuration| controls?| environments?| equipment| events?| hardware| hosts?| infrastructure| installations?| installers?| machines?| media| nodes?| provisioning| servers?| workers?)": bare metal
@@ -18,13 +18,15 @@ swap:
   "bottom(?:-)?right": lower right|lower-right
   "shell(?! prompt| script)": shell prompt
   "x64|x86-64|(?<!64-bit )x86": 64-bit x86|x86_64
+  '(?<!.*-|program )operator': Operator
+  '(?<!.*-|program )operators': Operators
   '(?<![\.\-])(?:zip|gzip|tar)(?! file| archive)': compress
   '(?<!\.)tar file': ".tar file"
   '(?<!\.)zip file': ".zip file"
-  above: later|previous|preceding
+  above: earlier|previous|preceding|before
   afterwards: afterward
   all caps: uppercase
-  below: earlier|later|following
+  below: after|later|following
   bottom left: lower left
   bottom right: lower right
   bugfix: bug fix
@@ -43,6 +45,7 @@ swap:
   launch: start|open
   legacy: existing|traditional|established|classic|earlier|previous
   once: after|when
+  on-premise: on-site|in-house
   refer to: see
   segfault: segmentation fault
   spawn: create
