@@ -68,6 +68,9 @@ services:
       - type: "volume"
         source: "home_cache"
         target: "/home/project-structure/.cache"
+      # Preserve shell history inside containers, requires `$ touch
+      # ./home/.bash_history`:
+      - "./home/.bash_history:/home/project-structure/.bash_history"
       # Avoid any clashes between image variants and the local host at both build and
       # runtime.
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian}/\
