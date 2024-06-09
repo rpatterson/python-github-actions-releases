@@ -986,13 +986,21 @@ $(HOME)/.local/state/docker-multi-platform/log/host-install.log:
 	fi
 	date | tee -a "$(@)"
 
-# Create the Docker compose network a single time under parallel make:
-./var/log/docker-compose-network.log:
+# Perform any initial setup needed by more than one container, such as the network and
+# shared volumes:
+./var/log/docker-compose-network.log: ./home/.local/share/$(PROJECT_NAME)/bash_history
 	$(MAKE) "$(HOST_TARGET_DOCKER)" "./.env.~out~"
 	mkdir -pv "$(dir $(@))"
 # Workaround broken interactive session detection:
 	docker compose pull --quiet "vale" | tee -a "$(@)"
+# Create the Docker compose network a single time under parallel make:
 	$(DOCKER_COMPOSE_RUN_CMD) --entrypoint "true" vale | tee -a "$(@)"
+# Create any mount points for bind volumes that `# dockerd` shouldn't or can't create,
+# such as directory bind volumes that root shouldn't own by or file bind volumes that `#
+# dockerd` shouldn't create as directories:
+./home/.local/share/$(PROJECT_NAME)/bash_history:
+	mkdir -pv "$(dir $(@))"
+	touch "$(@)"
 
 # Local environment variables and secrets from a template:
 ./.env.in.~prereq~:
