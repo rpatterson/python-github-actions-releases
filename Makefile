@@ -210,6 +210,7 @@ DOCKER_IMAGE_DOCKER=$(DOCKER_NAMESPACE)/$(PROJECT_NAME)
 export DOCKER_IMAGE=$(DOCKER_IMAGE_$(DOCKER_REGISTRY))
 export DOCKER_PASS?=
 DOCKER_COMPOSE_RUN_CMD=docker compose run --rm -T --quiet-pull
+DOCKER_COMPOSE_UPGRADE=false
 TEST_CODE_PREREQS=./var/log/build-pkgs.log
 
 # Values used for publishing releases:
@@ -828,10 +829,10 @@ devel-format: ./var/log/docker-compose-network.log ./var/log/npm-install.log
 .PHONY: devel-upgrade
 ## Update requirements, dependencies, and other external versions tracked in VCS.
 devel-upgrade:
-	touch ./requirements/*.txt.in "./.vale.ini" ./styles/*.ini
-	$(MAKE) PIP_COMPILE_ARGS="--upgrade" \
+	touch ./requirements/*.txt.in "./.env.in.~prereq~" "./.vale.ini" ./styles/*.ini
+	$(MAKE) PIP_COMPILE_ARGS="--upgrade" DOCKER_COMPOSE_UPGRADE=true \
 	    "./requirements/$(PYTHON_HOST_ENV)/build.txt" devel-upgrade-pre-commit \
-	    devel-upgrade-js devel-upgrade-docker "./var/log/vale-rule-levels.log"
+	    devel-upgrade-js "./var/log/vale-rule-levels.log"
 .PHONY: devel-upgrade-pre-commit
 ## Update VCS integration from remotes to the most recent tag.
 devel-upgrade-pre-commit: ./.tox/build/.tox-info.json
@@ -843,33 +844,9 @@ devel-upgrade-js: ./var/log/npm-install.log
 	~/.nvm/nvm-exec npm outdated
 .PHONY: devel-upgrade-docker
 ## Update the container images of development tools.
-devel-upgrade-docker: $(HOST_TARGET_DOCKER) ./.env.~out~
-# Define the image tag to track in `./docker-compose*.yml` in the default values for the
-# `${DOCKER_*_DIGEST}` environment variables and track the locked/frozen image digests
-# in `./.env.in` in VCS:
-	grep -vE "DOCKER_[A-Z0-9_]+_DIGEST=@.*" <"./.env.in" >"./.env.in.~upgrade~"
-	mv -v --backup="numbered" "./.env.in.~upgrade~" "./.env.in"
-	grep -vE "DOCKER_[A-Z0-9_]+_DIGEST=@.*" <"./.env" >"./.env.~upgrade~"
-	mv -v --backup="numbered" "./.env.~upgrade~" "./.env"
-	services="$$(
-	    docker compose config --profiles | while read
-	    do
-	        docker compose --profile "$${REPLY}" config --services
-	    done | sort | uniq | grep -Ev '^($(PROJECT_NAME)|build-host)'
-	)"
-	docker compose pull $${services}
-	for service in $${services}
-	do
-	    env_var="DOCKER_$${service^^}_DIGEST"
-	    env_var="$${env_var//-/_}"
-	    digest="$$(
-	        docker compose config --resolve-image-digests --format "json" \
-	            "$${service}" |
-	            jq -r ".services.\"$${service}\".image" | cut -d "@" -f "2-"
-	    )"
-	    echo "$${env_var}=@$${digest}" >>"./.env.in"
-	    echo "$${env_var}=@$${digest}" >>"./.env"
-	done
+devel-upgrade-docker: $(HOST_TARGET_DOCKER)
+	touch "./.env.in.~prereq~"
+	$(MAKE) DOCKER_COMPOSE_UPGRADE=true "./.env.~out~"
 
 .PHONY: devel-upgrade-branch
 ## Reset an upgrade branch, commit upgraded dependencies on it, and push for review.
@@ -932,6 +909,7 @@ clean:
 # TEMPLATE: Add any other prerequisites that are likely to require updating the build
 # package.
 ./var/log/build-pkgs.log: ./var-host/log/make-runs/$(MAKE_RUN_UUID).log \
+		 ./var/log/docker-compose-network.log \
 		./var-docker/$(DOCKER_VARIANT)/log/build-devel.log
 	mkdir -pv "$(dir $(@))"
 	$(DOCKER_COMPOSE_RUN_CMD) $(PROJECT_NAME)-devel \
@@ -1017,10 +995,64 @@ $(HOME)/.local/state/docker-multi-platform/log/host-install.log:
 	$(DOCKER_COMPOSE_RUN_CMD) --entrypoint "true" vale | tee -a "$(@)"
 
 # Local environment variables and secrets from a template:
+./.env.in.~prereq~:
+	touch "$(@)"
+./.env.in: ./.env.in.~prereq~
+ifeq ($(DOCKER_COMPOSE_UPGRADE),true)
+# Define the image tag to track in `./docker-compose*.yml` in the default values for the
+# `${DOCKER_*_DIGEST}` environment variables and track the locked/frozen image digests
+# in `./.env.in` in VCS:
+#
+# If changes updated the template, prompt the user to reconcile any differences before
+# upgrading image digests:
+	if test "$(@)" -nt "$(@:%.in=%)"
+	then
+	    $(call expand_template,$(@),$(@:%.in=%))
+	fi
+# Create a temporary `./.env` without any image digests so that `$ docker compose`
+# reverts to use the image tags, for example `*:latest`:
+	grep -vE "DOCKER_[A-Z0-9_]+_DIGEST=@.*" <"$(@)" >"$(@).~upgrade~"
+	mv -v --backup="numbered" "$(@).~upgrade~" "$(@)"
+	if test -e "$(@:%.in=%)"
+	then
+	    mv -v "$(@:%.in=%)" "$(@:%.in=%).~upgrade~"
+	fi
+	envsubst <"$(@)" >"$(@:%.in=%)"
+# Pull the most recent images for the given tags:
+	services="$$(
+	    docker compose config --profiles | while read
+	    do
+	        docker compose --profile "$${REPLY}" config --services
+	    done | sort | uniq | grep -Ev '^($(PROJECT_NAME)|build-host)'
+	)"
+	docker compose pull $${services}
+# Write the image digests for the pulled images back to the `./.env.in` template:
+	for service in $${services}
+	do
+	    env_var="DOCKER_$${service^^}_DIGEST"
+	    env_var="$${env_var//-/_}"
+	    digest="$$(
+	        docker compose config --resolve-image-digests --format "json" \
+	            "$${service}" |
+	            jq -r ".services.\"$${service}\".image" | cut -d "@" -f "2-"
+	    )"
+	    echo "$${env_var}=@$${digest}" >>"$(@)"
+	done
+# Restore the user's possibly customized `./.env` but with the new image digests:
+	if test -e "$(@:%.in=%).~upgrade~"
+	then
+	    grep -vE "DOCKER_[A-Z0-9_]+_DIGEST=@.*" \
+	        <"$(@:%.in=%).~upgrade~" >"$(@:%.in=%)"
+	    grep -E "DOCKER_[A-Z0-9_]+_DIGEST=@.*" <"$(@)" >>"$(@:%.in=%)"
+	fi
+else
+# There's nothing to change in the template if not upgrading image digests:
+	touch "$(@)"
+endif
 ./.env.~out~: ./.env.in
 	$(call expand_template,$(<),$(@))
 
-./README.md: README.rst
+./README.md: README.rst ./var/log/docker-compose-network.log
 	$(MAKE) "$(HOST_TARGET_DOCKER)"
 	$(DOCKER_COMPOSE_RUN_CMD) "pandoc"
 
@@ -1059,7 +1091,7 @@ endif
 ./var/log/git-ls-files.log: ./var-host/log/make-runs/$(MAKE_RUN_UUID).log
 	mkdir -pv "$(dir $(@))"
 	git ls-files >"$(@).~new~"
-	if diff -u "$(@)" "$(@).~new~"
+	if diff --color -u "$(@)" "$(@).~new~"
 	then
 	    exit
 	fi
@@ -1211,7 +1243,7 @@ if test ! -e "$(2:%.~out~=%)"
 then
     touch -d "@0" "$(2:%.~out~=%)"
 fi
-envsubst <"$(1)" | diff -u "$(2:%.~out~=%)" "-" || true
+envsubst <"$(1)" | diff --color -u "$(2:%.~out~=%)" "-" || true
 set +x
 echo "WARNING:Template $(1) changed, reconcile and \`$$ touch $(2:%.~out~=%)\`."
 set -x

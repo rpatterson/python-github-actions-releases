@@ -81,7 +81,7 @@ services:
     # used currently:
     image: "ghcr.io/hadolint/hadolint${DOCKER_HADOLINT_DIGEST:-:latest-debian}"
     profiles:
-      - "test"
+      - "lint"
     environment:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
@@ -90,7 +90,7 @@ services:
         target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
-      hadolint "./Dockerfile"
+      hadolint "./build-host/Dockerfile"
 
   reuse:
     image: "docker.io/fsfe/reuse${DOCKER_REUSE_DIGEST:-:latest-debian}"
@@ -223,7 +223,7 @@ services:
 
 volumes:
   checkout:
-    name: "${PROJECT_NAME:-project-structure}_checkout"
+    name: "project_structure_checkout"
     driver: "local"
     driver_opts:
       type: "none"
