@@ -1,3 +1,2 @@
-# https://towncrier.readthedocs.io/en/stable/quickstart.html#configuration
+# https://towncrier.readthedocs.io/en/stable/tutorial.html#configuration
 !.git*
-!/*~
