@@ -32,3 +32,10 @@ proselint
 
 # Publish release artifacts to remotes:
 twine
+# Workaround broken requirements hash:
+#    ERROR: In --require-hashes mode, all requirements must have their versions pinned
+#    with ==. These do not:
+#        backports.tarfile from
+#        https://files.pythonhosted.org/packages/b9/fa/123043af240e49752f1c4bd24da5053b6bd00cad78c2be53c0d1e8b975bc/backports.tarfile-1.2.0-py3-none-any.whl
+#        (from jaraco-context==5.3.0->-r requirements/py312/build.txt (line 264))
+backports.tarfile
