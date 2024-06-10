@@ -683,9 +683,9 @@ numpy==1.26.4 \
     # via
     #   contourpy
     #   matplotlib
-packaging==24.0 \
-    --hash=sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5 \
-    --hash=sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9
+packaging==24.1 \
+    --hash=sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002 \
+    --hash=sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124
     # via
     #   black
     #   build
@@ -935,9 +935,9 @@ pyproject-hooks==1.1.0 \
     --hash=sha256:4b37730834edbd6bd37f26ece6b44802fb1c1ee2ece0e54ddff8bfc06db86965 \
     --hash=sha256:7ceeefe9aec63a1064c18d939bdc3adf2d8aa1988a510afec15151578b232aa2
     # via build
-pyright==1.1.365 \
-    --hash=sha256:194d767a039f9034376b7ec8423841880ac6efdd061f3e283b4ad9fcd484a659 \
-    --hash=sha256:d7e69000939aed4bf823707086c30c84c005bdd39fac2dfb370f0e5be16c2ef2
+pyright==1.1.366 \
+    --hash=sha256:10e4d60be411f6d960cd39b0b58bf2ff76f2c83b9aeb102ffa9d9fda2e1303cb \
+    --hash=sha256:c09e73ccc894976bcd6d6a5784aa84d724dbd9ceb7b873b39d475ca61c2de071
     # via prospector
 pyroma==4.2 \
     --hash=sha256:6c727dc4a7a10e12274faed5fb47ebd499ca0821995befec98e3cfcaf1e7383c \
@@ -1156,12 +1156,10 @@ trove-classifiers==2024.5.22 \
 typer==0.12.3 \
     --hash=sha256:070d7ca53f785acbccba8e7d28b08dcd88f79f1fbda035ade0aecec71ca5c914 \
     --hash=sha256:49e73131481d804288ef62598d97a1ceef3058905aa536a1134f90891ba35482
-    # via
-    #   rstcheck
-    #   typer
-typing-extensions==4.12.1 \
-    --hash=sha256:6024b58b69089e5a89c347397254e35f1bf02a907728ec7fee9bf0fe837d203a \
-    --hash=sha256:915f5e35ff76f56588223f15fdd5938f9a1cf9195c0de25130c627e4d597f6d1
+    # via rstcheck
+typing-extensions==4.12.2 \
+    --hash=sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d \
+    --hash=sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8
     # via
     #   anyio
     #   astroid

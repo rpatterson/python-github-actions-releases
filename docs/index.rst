@@ -6,14 +6,14 @@
    :keywords: template, structure
 
 .. include:: ../README.rst
-   :start-after: include-above-contents-start
-   :end-before: include-above-contents-end
+   :start-after: include-before-contents-start
+   :end-before: include-before-contents-end
 
 .. contents:: On this page:
    :local:
 
 .. include:: ../README.rst
-   :start-after: include-below-contents-start
+   :start-after: include-after-contents-start
 
 .. project-structure documentation root file, created by
    sphinx-quickstart on Wed May 24 21:39:04 2023.
