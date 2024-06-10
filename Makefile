@@ -595,9 +595,9 @@ devel-upgrade-branch: ./var/log/git-fetch.log test-clean
 	    "./.pre-commit-config.yaml" "./package-lock.json" "./.vale.ini"
 	git add "./styles/"
 # Commit the upgrade changes
-	echo "Upgrade all requirements to the most recent versions as of" \
+	echo ":Upgrade: Upgrade all requirements to the most recent versions as of" \
 	    >"./newsfragments/+upgrade-requirements.bugfix.rst"
-	echo "$${now}." >>"./newsfragments/+upgrade-requirements.bugfix.rst"
+	echo "          $${now}." >>"./newsfragments/+upgrade-requirements.bugfix.rst"
 	git add "./newsfragments/+upgrade-requirements.bugfix.rst"
 	git commit --all --gpg-sign -m \
 	    "fix(deps): Upgrade to most recent versions"
