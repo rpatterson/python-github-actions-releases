@@ -21,7 +21,7 @@ export DOCKER_USER=$(DOCKER_NAMESPACE)
 # https://pkgs.alpinelinux.org/packages?name=python3&branch=edge&repo=main&arch=x86_64&maintainer=
 PYTHON_SUPPORTED_MINOR=3.12
 # https://devguide.python.org/versions/#supported-versions
-PYTHON_SUPPORTED_MINORS=$(PYTHON_SUPPORTED_MINOR) 3.12 3.10 3.9 3.8
+PYTHON_SUPPORTED_MINORS=$(PYTHON_SUPPORTED_MINOR) 3.11 3.10 3.9 3.8
 
 # Option variables that control behavior:
 export TEMPLATE_IGNORE_EXISTING?=false
