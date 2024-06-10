@@ -19,7 +19,7 @@ export DOCKER_NAMESPACE=merpatterson
 export DOCKER_USER=$(DOCKER_NAMESPACE)
 # Match the same Python version available in the `./build-host/` Docker image:
 # https://pkgs.alpinelinux.org/packages?name=python3&branch=edge&repo=main&arch=x86_64&maintainer=
-PYTHON_SUPPORTED_MINOR=3.11
+PYTHON_SUPPORTED_MINOR=3.12
 
 # Option variables that control behavior:
 export TEMPLATE_IGNORE_EXISTING?=false
