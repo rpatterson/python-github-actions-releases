@@ -197,7 +197,7 @@ Installation
 
 Install locally or use the Docker container image:
 
-Local Installation
+Local installation
 ========================================================================================
 
 Use a package manager for the project language to install locally::
@@ -206,7 +206,7 @@ Use a package manager for the project language to install locally::
 
   $ true "TEMPLATE: Always specific to the project type"
 
-Docker Container Image
+Docker container image
 ========================================================================================
 
 The recommended way to use the container image is by using `Docker Compose`_. See `the
