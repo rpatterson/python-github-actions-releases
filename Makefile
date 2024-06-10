@@ -19,7 +19,7 @@ export DOCKER_NAMESPACE=merpatterson
 export DOCKER_USER?=$(DOCKER_NAMESPACE)
 # Match the same Python version available in the `./build-host/` Docker image:
 # https://pkgs.alpinelinux.org/packages?name=python3&branch=edge&repo=main&arch=x86_64&maintainer=
-PYTHON_SUPPORTED_MINOR=3.11
+PYTHON_SUPPORTED_MINOR=3.12
 
 # Option variables that control behavior:
 export TEMPLATE_IGNORE_EXISTING?=false
@@ -863,9 +863,9 @@ devel-upgrade-branch: ./var/log/git-fetch.log test-clean
 	    "./.pre-commit-config.yaml" "./package-lock.json" "./.vale.ini"
 	git add "./styles/"
 # Commit the upgrade changes
-	echo "Upgrade all requirements to the most recent versions as of" \
+	echo ":Upgrade: Upgrade all requirements to the most recent versions as of" \
 	    >"./newsfragments/+upgrade-requirements.bugfix.rst"
-	echo "$${now}." >>"./newsfragments/+upgrade-requirements.bugfix.rst"
+	echo "          $${now}." >>"./newsfragments/+upgrade-requirements.bugfix.rst"
 	git add "./newsfragments/+upgrade-requirements.bugfix.rst"
 	git commit --all --gpg-sign -m \
 	    "fix(deps): Upgrade to most recent versions"
