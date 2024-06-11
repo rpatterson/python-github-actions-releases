@@ -9,27 +9,27 @@ services:
   # Configuration specific to development:
   project-structure:
     image: "${DOCKER_NAMESPACE:-merpatterson}/project-structure\
-      :user-${DOCKER_VARIANT:-debian-py311}-${DOCKER_BRANCH_TAG:-develop}"
+      :user-${DOCKER_VARIANT:-debian-py312}-${DOCKER_BRANCH_TAG:-develop}"
     container_name: "project-structure-checkout"
     build:
       context: "./"
       target: "user"
       args:
         BUILDKIT_INLINE_CACHE: "1"
-        PYTHON_MINOR: "${PYTHON_MINOR:-3.11}"
-        PYTHON_ENV: "${PYTHON_ENV:-py311}"
+        PYTHON_MINOR: "${PYTHON_MINOR:-3.12}"
+        PYTHON_ENV: "${PYTHON_ENV:-py312}"
         PYTHON_WHEEL: "${PYTHON_WHEEL:-}"
         VERSION: "${VERSION:-}"
       cache_from:
         - "${DOCKER_NAMESPACE:-merpatterson}/project-structure\
-          :user-${DOCKER_VARIANT:-debian-py311}-${DOCKER_BRANCH_TAG:-develop}"
+          :user-${DOCKER_VARIANT:-debian-py312}-${DOCKER_BRANCH_TAG:-develop}"
 
   ## Contianers used for development and release:
 
   # Container for use by developers:
   project-structure-devel:
     image: "${DOCKER_NAMESPACE:-merpatterson}/project-structure\
-      :devel-${DOCKER_VARIANT:-debian-py311}-${DOCKER_BRANCH_TAG:-develop}"
+      :devel-${DOCKER_VARIANT:-debian-py312}-${DOCKER_BRANCH_TAG:-develop}"
     container_name: "project-structure-devel"
     profiles:
       - "devel"
@@ -38,12 +38,12 @@ services:
       target: "devel"
       args:
         BUILDKIT_INLINE_CACHE: "1"
-        PYTHON_MINOR: "${PYTHON_MINOR:-3.11}"
-        PYTHON_ENV: "${PYTHON_ENV:-py311}"
+        PYTHON_MINOR: "${PYTHON_MINOR:-3.12}"
+        PYTHON_ENV: "${PYTHON_ENV:-py312}"
         VERSION: "${VERSION:-}"
       cache_from:
         - "${DOCKER_NAMESPACE:-merpatterson}/project-structure\
-          :devel-${DOCKER_VARIANT:-debian-py311}-${DOCKER_BRANCH_TAG:-develop}"
+          :devel-${DOCKER_VARIANT:-debian-py312}-${DOCKER_BRANCH_TAG:-develop}"
     environment:
       # Continue parallel make inside the container:
       MAKEFLAGS: "${MAKEFLAGS:-}"
@@ -78,11 +78,11 @@ services:
       - "./home/.bash_history:/home/project-structure/.bash_history"
       # Avoid any clashes between image variants and the local host at both build and
       # runtime:
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian-py311}\
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian-py312}\
         /:/usr/local/src/project-structure${WORKTREE_REL:-}/var/"
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian-py311}\
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian-py312}\
         /.tox/:/usr/local/src/project-structure${WORKTREE_REL:-}/.tox/"
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian-py311}\
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian-py312}\
         /project_structure.egg-info/\
         :/usr/local/src/project-structure${WORKTREE_REL:-}\
         /src/project_structure.egg-info/"

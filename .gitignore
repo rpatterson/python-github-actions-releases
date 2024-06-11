@@ -39,7 +39,7 @@ parts
 *.egg
 **/.egg
 /src/*/_version.py
-/project-structure-*
+/project[-_]structure-*
 
 # PyInstaller
 #  Usually a python script writes these files from a template before PyInstaller builds

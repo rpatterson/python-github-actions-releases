@@ -6,7 +6,7 @@
 ## Image layers shared between all variants.
 
 # Stay as close to an un-customized environment as possible:
-ARG PYTHON_MINOR=3.11
+ARG PYTHON_MINOR=3.12
 FROM python:${PYTHON_MINOR} AS base
 # Defensive shell options:
 SHELL ["/bin/bash", "-eu", "-o", "pipefail", "-c"]
@@ -15,7 +15,7 @@ SHELL ["/bin/bash", "-eu", "-o", "pipefail", "-c"]
 ARG PROJECT_NAMESPACE=rpatterson
 ARG PROJECT_NAME=project-structure
 # Image variant constants:
-ARG PYTHON_MINOR=3.11
+ARG PYTHON_MINOR=3.12
 
 # Least volatile layers first:
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
@@ -65,7 +65,7 @@ FROM base AS user
 
 # Install dependencies with fixed versions in a separate layer to optimize build times
 # because this step takes the most time and changes the least often.
-ARG PYTHON_ENV=py311
+ARG PYTHON_ENV=py312
 WORKDIR "${VIRTUAL_ENV}"
 COPY [ "./requirements/${PYTHON_ENV}/user.txt", "./requirements.txt" ]
 # hadolint ignore=DL3042,SC1091
@@ -115,7 +115,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get install --no-install-recommends -y \
     "texinfo=6.8-6+b1" "texlive-full=2022.20230122-3" "latexmk=1:4.79-1" \
-    "ghostscript=10.0.0~dfsg-11+deb12u3" "inkscape=1.2.2-2+b1" "pipx=1.1.0-1"
+    "ghostscript=10.0.0~dfsg-11+deb12u4" "inkscape=1.2.2-2+b1" "pipx=1.1.0-1"
 
 # Bake in tools used in the inner loop of the development cycle:
 # hadolint ignore=DL3042

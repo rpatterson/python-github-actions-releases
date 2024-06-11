@@ -5,8 +5,8 @@
 # Ensure the Docker volume exists so `# dockerd` doesn't create this as root:
 /*
 !.git*
-!/debian-py311
 !/debian-py312
+!/debian-py311
 !/debian-py310
 !/debian-py39
 !/debian-py38

@@ -54,8 +54,8 @@ pep257:
     # exceeds the `max-line-length`:
     - "D200"
 
-# Prospector's file finding process seems quite expensive, best to aggressively
-# exclude directories it should never have to search:
+# Prospector's file finding process seems expensive, best to aggressively exclude
+# directories it should never have to search:
 # https://prospector.landscape.io/en/master/profiles.html#ignoring-paths-and-patterns
 ignore-paths:
   # Build artifacts that might contain many files:
