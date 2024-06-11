@@ -61,8 +61,14 @@ RUN \
     "curl" \
     "imagemagick" \
     "librsvg" \
+    "texlive-luatex" \
+    "texmf-dist-binextra" \
     "texinfo" \
-    "texlive-full" \
+    "texmf-dist-latex" \
+    "texmf-dist-lang" \
+    "texmf-dist-latexrecommended" \
+    "texmf-dist-fontsrecommended" \
+    "texmf-dist-latexextra" \
     "github-cli" \
     && groupdel "docker" \
     && apk del --no-cache "shadow" \
