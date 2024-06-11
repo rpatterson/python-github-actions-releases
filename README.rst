@@ -3,7 +3,7 @@
 .. SPDX-License-Identifier: MIT
 
 .. image:: ./docs/_static/logo-120.png
-.. include-above-contents-start
+.. include-before-contents-start
 
 ########################################################################################
 Project Structure
@@ -106,9 +106,9 @@ variants. Real projects can also merge those changes.
 .. _`Organize source by feature`:
    https://www.seancdavis.com/posts/organize-components-by-keeping-related-files-close/
 
-.. include-above-contents-end
+.. include-before-contents-end
 .. contents:: Table of Contents
-.. include-below-contents-start
+.. include-after-contents-start
 
 
 ****************************************************************************************
@@ -219,7 +219,7 @@ Installation
 
 Install locally or use the Docker container image:
 
-Local Installation
+Local installation
 ========================================================================================
 
 Install by using any tool for installing standard Python 3 distributions. The
@@ -230,7 +230,7 @@ isolate from other packages:
 
   $ pipx install tox
 
-Docker Container Image
+Docker container image
 ========================================================================================
 
 The recommended way to use the container image is by using `Docker Compose`_. See `the

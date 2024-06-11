@@ -5,8 +5,6 @@
 # Override `$ docker compose` configuration for development or testing here in this
 # repository checkout. Put everything used outside this checkout in
 # `./docker-compose.yml`.
-version: "3.8"
-
 services:
   # Configuration specific to development:
   project-structure:
@@ -34,7 +32,7 @@ services:
       :devel-${DOCKER_VARIANT:-debian-py311}-${DOCKER_BRANCH_TAG:-develop}"
     container_name: "project-structure-devel"
     profiles:
-      - "test"
+      - "devel"
     build:
       context: "./"
       target: "devel"
@@ -62,14 +60,22 @@ services:
       # Reflect local changes inside the container:
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/bin/entrypoint.sh\
         :/usr/local/bin/entrypoint.sh"
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "checkout"
+        target: "/usr/local/src/project-structure"
       # Preserve user configuration, data, and caches between containers and variants:
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/home/.config/\
-        :/home/project-structure/.config/"
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/home/.local/share/\
-        :/home/project-structure/.local/share/"
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/home/.cache/\
-        :/home/project-structure/.cache/"
+      - type: "volume"
+        source: "home_config"
+        target: "/home/project-structure/.config"
+      - type: "volume"
+        source: "home_local_share"
+        target: "/home/project-structure/.local/share"
+      - type: "volume"
+        source: "home_cache"
+        target: "/home/project-structure/.cache"
+      # Preserve shell history inside containers, requires `$ touch
+      # ./home/.bash_history`:
+      - "./home/.bash_history:/home/project-structure/.bash_history"
       # Avoid any clashes between image variants and the local host at both build and
       # runtime:
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian-py311}\
@@ -89,14 +95,16 @@ services:
     # used currently:
     image: "ghcr.io/hadolint/hadolint${DOCKER_HADOLINT_DIGEST:-:latest-debian}"
     profiles:
-      - "test"
+      - "lint"
     environment:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "checkout"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
-      hadolint "./Dockerfile"
+      hadolint "./build-host/Dockerfile"
 
   reuse:
     image: "docker.io/fsfe/reuse${DOCKER_REUSE_DIGEST:-:latest-debian}"
@@ -106,7 +114,9 @@ services:
     environment:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "checkout"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       lint
@@ -119,7 +129,9 @@ services:
     environment:
       TZ: "${TZ:-Etc/UTC}"
     volumes:
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure"
+      - type: "volume"
+        source: "checkout"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       .
@@ -130,7 +142,9 @@ services:
       - "release"
     user: "${PUID:-1000}:${PGID:-${PUID:-1000}}"
     volumes:
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "checkout"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     entrypoint: "ash"
     # Strip reStructuredText directives unsupported in Markdown before converting, for
@@ -154,7 +168,9 @@ services:
       DOCKER_USER: "${DOCKER_USER:-}"
       DOCKER_PASS: "${DOCKER_PASS:-}"
     volumes:
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "checkout"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       --file "./var/README.md"
@@ -170,7 +186,9 @@ services:
     environment:
       CI_JOB_TOKEN: "${CI_JOB_TOKEN:-}"
     volumes:
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "checkout"
+        target: "/usr/local/src/project-structure"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
 
   ## Containers for simulating CI/CD:
@@ -189,7 +207,9 @@ services:
     privileged: true
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "${CHECKOUT_DIR:-.}/:/usr/local/src/project-structure/"
+      - type: "volume"
+        source: "checkout"
+        target: "/usr/local/src/project-structure"
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/init-job.sh\
         :/usr/local/bin/init-job.sh"
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/entrypoint.sh\
@@ -214,3 +234,12 @@ services:
       # DEBUG: "true"
     command: >-
       make -j -O release-all
+
+volumes:
+  checkout:
+    name: "project_structure_checkout"
+    driver: "local"
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${CHECKOUT_DIR:-.}/"

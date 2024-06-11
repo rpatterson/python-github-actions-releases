@@ -34,19 +34,20 @@ main() {
 
 	# Ensure the home directory in the image has the correct permissions. Change
 	# permissions selectively to avoid time-consuming recursion:
-	chown ${CHOWN_ARGS} -R "${PUID}:${PGID}" "/home/${PROJECT_NAME}/"
+	chown ${CHOWN_ARGS} "${PUID}:${PGID}" "/home/${PROJECT_NAME}/" \
+	      /home/${PROJECT_NAME}/.??* /home/${PROJECT_NAME}/.local/*
 
         # Add an unprivileged user:
         if ! getent group "${PGID}" >"/dev/null"
         then
-            addgroup ${ADDUSER_ARGS} --gid "${PGID}" "${PROJECT_NAME}"
+            addgroup ${ADDUSER_ARGS} --gid "${PGID}" "project-structure"
         fi
         if ! id "${PUID}" >"/dev/null" 2>&1
         then
             # Add a user to the `passwd` DB to support looking up the
             # `~project-structure/` HOME directory:
             adduser ${ADDUSER_ARGS} --uid "${PUID}" --gid "${PGID}" \
-	        --disabled-password --gecos "Project Structure,,," "${PROJECT_NAME}" \
+	        --disabled-password --gecos "Project Structure,,," "project-structure" \
 	        > "/dev/null"
         fi
         if tty_dev=$(tty)

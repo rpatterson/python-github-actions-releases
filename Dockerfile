@@ -40,13 +40,6 @@ ENV PATH="${VIRTUAL_ENV}/bin:${HOME}/.local/bin:${PATH}"
 ENTRYPOINT [ "entrypoint.sh" ]
 CMD [ "python" ]
 
-# Support for a volume to preserve data between runs and share data between variants:
-# TEMPLATE: Add other user `${HOME}/` files to preserved.
-RUN mkdir -pv "${HOME}/.local/share/${PROJECT_NAME}/" && \
-    touch "${HOME}/.local/share/${PROJECT_NAME}/bash_history" && \
-    ln -snv --relative "${HOME}/.local/share/${PROJECT_NAME}/bash_history" \
-        "${HOME}/.bash_history"
-
 # Put the `ENTRYPOINT` on the `$PATH`
 COPY [ "./bin/entrypoint.sh", "/usr/local/bin/" ]
 
