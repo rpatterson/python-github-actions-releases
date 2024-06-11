@@ -266,7 +266,7 @@ $(DOCS_SPHINX_BUILDERS:%=build-docs-%): ./.tox/build/.tox-info.json \
 build-docs-pdf: build-docs-latex
 # TODO: Switch to a TeX Live container for SVG support.
 	$(MAKE) -C "./build/docs/$(<:build-docs-%=%)/" \
-	    LATEXMKOPTS="-f -interaction=nonstopmode" all-pdf || true
+	    LATEXMKOPTS="-f -interaction=nonstopmode" all-pdf
 .PHONY: build-docs-info
 ## Render the Texinfo documentation into a `*.info` file.
 build-docs-info: build-docs-texinfo
