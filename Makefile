@@ -196,6 +196,9 @@ else ifeq ($(VCS_BRANCH),develop)
 RELEASE_PUBLISH=true
 endif
 
+# Variables related to tools managed by `./*compose*.yml`:
+DOCKER_COMPOSE_UPGRADE=false
+
 # https://www.sphinx-doc.org/en/master/usage/builders/index.html
 # Run these Sphinx builders to test the correctness of the documentation:
 # <!--alex disable gals-man-->
@@ -203,6 +206,7 @@ DOCS_SPHINX_BUILDERS=html dirhtml singlehtml htmlhelp qthelp epub applehelp late
     texinfo text gettext linkcheck xml pseudoxml
 DOCS_SPHINX_ALL_FORMATS=$(DOCS_SPHINX_BUILDERS) devhelp pdf info
 # <!--alex enable gals-man-->
+DOCS_SPHINX_BUILD_OPTS=
 # These builders report false warnings or failures:
 
 # Override variable values if present in `./.env` and if not overridden on the
