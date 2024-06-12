@@ -79,7 +79,7 @@ LABEL org.opencontainers.image.description="Container image in which to build, t
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.authors="Ross Patterson <me@rpatterson.net>"
 LABEL org.opencontainers.image.vendor="rpatterson.net"
-LABEL org.opencontainers.image.base.name="docker.io/library/docker:latest"
+LABEL org.opencontainers.image.base.name="docker.io/library/docker:cli"
 # Build-time labels:
 LABEL org.opencontainers.image.version=2.0.0
 
