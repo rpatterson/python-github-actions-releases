@@ -5,6 +5,8 @@
 ## Container image in which to build, test, and release projects.
 
 FROM docker:cli
+# Defensive shell options:
+SHELL ["/bin/ash", "-eu", "-c"]
 
 # Avoid long re-build times, longest running layers first:
 
