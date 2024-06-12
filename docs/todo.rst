@@ -20,10 +20,6 @@ Required
 #. ``docker``: Missing ``LABEL`` tag: ``"org.opencontainers.image.base.name":
    "docker.io/library/python:"``
 
-#. ``base``: Rename ``docker-compose*.yml`` files to `the newer canonical
-   <https://docs.docker.com/compose/compose-application-model/#the-compose-file>`_
-   ``compose*.yml`` names.
-
 #. ``docker``: Switch to the newer and more explicit `'include:' section
    <https://docs.docker.com/compose/compose-file/14-include/>`_ in the YAML.
 

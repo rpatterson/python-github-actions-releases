@@ -660,7 +660,7 @@ clean:
 	touch "$(@)"
 ./.env.in: ./.env.in.~prereq~
 ifeq ($(DOCKER_COMPOSE_UPGRADE),true)
-# Define the image tag to track in `./docker-compose*.yml` in the default values for the
+# Define the image tag to track in `./compose*.yml` in the default values for the
 # `${DOCKER_*_DIGEST}` environment variables and track the locked/frozen image digests
 # in `./.env.in` in VCS:
 #
