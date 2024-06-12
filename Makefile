@@ -19,7 +19,7 @@ export DOCKER_NAMESPACE=merpatterson
 export DOCKER_USER?=$(DOCKER_NAMESPACE)
 # Match the same Python version available in the `./build-host/` Docker image:
 # https://pkgs.alpinelinux.org/packages?name=python3&branch=edge&repo=main&arch=x86_64&maintainer=
-PYTHON_SUPPORTED_MINOR=3.11
+PYTHON_SUPPORTED_MINOR=3.12
 
 # Option variables that control behavior:
 export TEMPLATE_IGNORE_EXISTING?=false
@@ -232,6 +232,9 @@ ifeq ($(RELEASE_PUBLISH),true)
 DOCKER_PLATFORMS=linux/amd64 linux/arm64 linux/arm/v7
 endif
 
+# Variables related to tools managed by `./*compose*.yml`:
+DOCKER_COMPOSE_UPGRADE=false
+
 # https://www.sphinx-doc.org/en/master/usage/builders/index.html
 # Run these Sphinx builders to test the correctness of the documentation:
 # <!--alex disable gals-man-->
@@ -239,6 +242,7 @@ DOCS_SPHINX_BUILDERS=html dirhtml singlehtml htmlhelp qthelp epub applehelp late
     texinfo text gettext linkcheck xml pseudoxml
 DOCS_SPHINX_ALL_FORMATS=$(DOCS_SPHINX_BUILDERS) devhelp pdf info
 # <!--alex enable gals-man-->
+DOCS_SPHINX_BUILD_OPTS=
 # These builders report false warnings or failures:
 
 # Override variable values if present in `./.env` and if not overridden on the
@@ -312,7 +316,7 @@ $(DOCS_SPHINX_BUILDERS:%=build-docs-%): ./.tox/build/.tox-info.json \
 build-docs-pdf: build-docs-latex
 # TODO: Switch to a TeX Live container for SVG support.
 	$(MAKE) -C "./build/docs/$(<:build-docs-%=%)/" \
-	    LATEXMKOPTS="-f -interaction=nonstopmode" all-pdf || true
+	    LATEXMKOPTS="-f -interaction=nonstopmode" all-pdf
 .PHONY: build-docs-info
 ## Render the Texinfo documentation into a `*.info` file.
 build-docs-info: build-docs-texinfo
@@ -863,9 +867,9 @@ devel-upgrade-branch: ./var/log/git-fetch.log test-clean
 	    "./.pre-commit-config.yaml" "./package-lock.json" "./.vale.ini"
 	git add "./styles/"
 # Commit the upgrade changes
-	echo "Upgrade all requirements to the most recent versions as of" \
+	echo ":Upgrade: Upgrade all requirements to the most recent versions as of" \
 	    >"./newsfragments/+upgrade-requirements.bugfix.rst"
-	echo "$${now}." >>"./newsfragments/+upgrade-requirements.bugfix.rst"
+	echo "          $${now}." >>"./newsfragments/+upgrade-requirements.bugfix.rst"
 	git add "./newsfragments/+upgrade-requirements.bugfix.rst"
 	git commit --all --gpg-sign -m \
 	    "fix(deps): Upgrade to most recent versions"
@@ -1006,7 +1010,7 @@ $(HOME)/.local/state/docker-multi-platform/log/host-install.log:
 	touch "$(@)"
 ./.env.in: ./.env.in.~prereq~
 ifeq ($(DOCKER_COMPOSE_UPGRADE),true)
-# Define the image tag to track in `./docker-compose*.yml` in the default values for the
+# Define the image tag to track in `./compose*.yml` in the default values for the
 # `${DOCKER_*_DIGEST}` environment variables and track the locked/frozen image digests
 # in `./.env.in` in VCS:
 #
