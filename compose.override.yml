@@ -96,7 +96,7 @@ services:
     # used currently:
     image: "ghcr.io/hadolint/hadolint${DOCKER_HADOLINT_DIGEST:-:latest-debian}"
     command: >-
-      hadolint "./build-host/Dockerfile"
+      hadolint "./Dockerfile" "./build-host/Dockerfile"
 
   vale:
     <<: *service-linter
