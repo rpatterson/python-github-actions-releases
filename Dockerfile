@@ -24,7 +24,7 @@ LABEL org.opencontainers.image.description="Project structure foundation or temp
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.authors="Ross Patterson <me@rpatterson.net>"
 LABEL org.opencontainers.image.vendor="rpatterson.net"
-LABEL org.opencontainers.image.base.name="docker.io/library/buildpack-deps"
+LABEL org.opencontainers.image.base.name="docker.io/library/buildpack-deps:stable"
 
 ENV PROJECT_NAMESPACE="${PROJECT_NAMESPACE}"
 ENV PROJECT_NAME="${PROJECT_NAME}"
