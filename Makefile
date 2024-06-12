@@ -568,7 +568,7 @@ devel-upgrade:
 	touch ./requirements/*.txt.in "./.env.in.~prereq~" "./.vale.ini" ./styles/*.ini
 	$(MAKE) PIP_COMPILE_ARGS="--upgrade" DOCKER_COMPOSE_UPGRADE=true \
 	    "./requirements/$(PYTHON_HOST_ENV)/build.txt" devel-upgrade-pre-commit \
-	    devel-upgrade-js "./var/log/vale-rule-levels.log"
+	    devel-upgrade-js "./.env.~out~" "./var/log/vale-rule-levels.log"
 .PHONY: devel-upgrade-pre-commit
 ## Update VCS integration from remotes to the most recent tag.
 devel-upgrade-pre-commit: ./.tox/build/.tox-info.json
