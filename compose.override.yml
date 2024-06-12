@@ -4,7 +4,7 @@
 
 # Common configuration shared between services:
 
-x-volume-checkout: &volume-checkout
+x-volume-checkout-service: &volume-checkout-service
   type: "volume"
   source: "checkout"
   target: "/usr/local/src/project-structure"
@@ -14,7 +14,7 @@ x-service: &service
   environment:
     TZ: "${TZ:-Etc/UTC}"
   volumes:
-    - <<: *volume-checkout
+    - <<: *volume-checkout-service
   working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
 
 x-service-linter: &service-linter
@@ -65,7 +65,7 @@ services:
     privileged: true
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - <<: *volume-checkout
+      - <<: *volume-checkout-service
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/init-job.sh\
         :/usr/local/bin/init-job.sh"
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/entrypoint.sh\
