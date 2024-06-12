@@ -10,6 +10,18 @@ FROM buildpack-deps:stable AS base
 # Defensive shell options:
 SHELL ["/bin/bash", "-eu", "-o", "pipefail", "-c"]
 
+# Avoid long re-build times, longest running layers first:
+
+# Install operating system packages needed for the image `ENDPOINT`:
+RUN \
+    rm -f /etc/apt/apt.conf.d/docker-clean && \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' \
+    >"/etc/apt/apt.conf.d/keep-cache"
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && \
+    apt-get install --no-install-recommends -y "gosu=1.14-1+b6"
+
 # Project constants:
 ARG PROJECT_NAMESPACE=rpatterson
 ARG PROJECT_NAME=project-structure
@@ -34,23 +46,6 @@ WORKDIR "${HOME}"
 ENTRYPOINT [ "entrypoint.sh" ]
 CMD [ "bash" ]
 
-# Put the `ENTRYPOINT` on the `$PATH`
-COPY [ "./bin/entrypoint.sh", "/usr/local/bin/" ]
-
-# Install operating system packages needed for the image `ENDPOINT`:
-RUN \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
-    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' \
-    >"/etc/apt/apt.conf.d/keep-cache"
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && \
-    apt-get install --no-install-recommends -y "gosu=1.14-1+b6"
-
-# Build-time labels:
-ARG VERSION=
-LABEL org.opencontainers.image.version=${VERSION}
-
 
 ## Container image for use by end users.
 
@@ -59,6 +54,16 @@ FROM base AS user
 
 # TEMPLATE: Add image setup specific to the user image, often installable packages built
 # from the project.
+
+# Position cheap or quick layers that change often as the last layers and repeat between
+# image targets to avoid re-running expensive or long-running layers:
+
+# Put the `ENTRYPOINT` on the `$PATH`
+COPY [ "./bin/entrypoint.sh", "/usr/local/bin/" ]
+
+# Build-time labels:
+ARG VERSION=
+LABEL org.opencontainers.image.version=${VERSION}
 
 
 ## Container image for use by developers.
@@ -77,3 +82,13 @@ WORKDIR "/usr/local/src/${PROJECT_NAME}/"
 
 # TEMPLATE: Add image setup specific to the development for this project type, often at
 # least installing development tools.
+
+# Position cheap or quick layers that change often as the last layers and repeat between
+# image targets to avoid re-running expensive or long-running layers:
+
+# Put the `ENTRYPOINT` on the `$PATH`
+COPY [ "./bin/entrypoint.sh", "/usr/local/bin/" ]
+
+# Build-time labels:
+ARG VERSION=
+LABEL org.opencontainers.image.version=${VERSION}
