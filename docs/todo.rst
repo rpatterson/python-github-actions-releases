@@ -20,9 +20,6 @@ Required
 #. ``docker``: Missing ``LABEL`` tag: ``"org.opencontainers.image.base.name":
    "docker.io/library/python:"``
 
-#. ``docker``: Switch to the newer and more explicit `'include:' section
-   <https://docs.docker.com/compose/compose-file/14-include/>`_ in the YAML.
-
 #. ``docker``: Cleanup Docker Compose repetition with `YAML anchors
    <https://docs.docker.com/compose/compose-file/10-fragments/>`_ and `compose
    extensions <https://docs.docker.com/compose/compose-file/11-extension/>`_ and then
