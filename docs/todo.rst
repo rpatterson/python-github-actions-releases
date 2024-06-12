@@ -20,14 +20,6 @@ Required
 #. ``docker``: Missing ``LABEL`` tag: ``"org.opencontainers.image.base.name":
    "docker.io/library/python:"``
 
-#. ``docker``: Debug why the ``*-devel`` image's expensive ``# apt-get install ...``
-   layer being rebuilt so often. Maybe it's because the ``COPY [ "./bin/entrypoint.sh",
-   "/usr/local/bin/" ]`` layer is part of the ``base`` image. The approach to layers
-   might need rethinking altogether. Maybe cheap layers such as ``ENV`` and ``LABEL``,
-   maybe even ``ARG`` should be before expensive layers. Maybe it's worth even repeating
-   some cheap layers between the ``user`` and ``devel`` images to avoid them triggering
-   a rebuild of expensive layers.
-
 #. ``base``: Rename ``docker-compose*.yml`` files to `the newer canonical
    <https://docs.docker.com/compose/compose-application-model/#the-compose-file>`_
    ``compose*.yml`` names.
