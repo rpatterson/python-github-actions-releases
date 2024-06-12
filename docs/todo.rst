@@ -23,14 +23,11 @@ Required
 #. ``docker``: Switch to the newer and more explicit `'include:' section
    <https://docs.docker.com/compose/compose-file/14-include/>`_ in the YAML.
 
-#. ``base``: Cleanup Docker Compose repetition with `YAML anchors
+#. ``docker``: Cleanup Docker Compose repetition with `YAML anchors
    <https://docs.docker.com/compose/compose-file/10-fragments/>`_ and `compose
-   extensions <https://docs.docker.com/compose/compose-file/11-extension/>`_.
-
-#. ``docker``: Maybe `use 'extends:'
-   <https://docs.docker.com/compose/multiple-compose-files/extends/>`_ for the
-   ``*-devel`` service? When should the configuration use ``extends:`` and when should
-   it use YAML anchors?
+   extensions <https://docs.docker.com/compose/compose-file/11-extension/>`_ and then
+   reduce repetition between files by using `'extends:'
+   <https://docs.docker.com/compose/multiple-compose-files/extends/>`_.
 
 #. ``base``: Add an Open Collective badge.
 

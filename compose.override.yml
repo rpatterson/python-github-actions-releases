@@ -2,61 +2,56 @@
 #
 # SPDX-License-Identifier: MIT
 
+# Common configuration shared between services:
+
+x-volume-checkout: &volume-checkout
+  type: "volume"
+  source: "checkout"
+  target: "/usr/local/src/project-structure"
+
+x-service: &service
+  user: "${PUID:-1000}:${PGID:-${PUID:-1000}}"
+  environment:
+    TZ: "${TZ:-Etc/UTC}"
+  volumes:
+    - <<: *volume-checkout
+  working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
+
+x-service-linter: &service-linter
+  <<: *service
+  profiles:
+    - "lint"
+
 # Override `$ docker compose` configuration for development or testing here in this
 # repository checkout. Put everything used outside this checkout in
 # `./compose.yml`.
 services:
+  reuse:
+    <<: *service-linter
+    image: "docker.io/fsfe/reuse${DOCKER_REUSE_DIGEST:-:latest-debian}"
+    command: >-
+      lint
+
   # https://github.com/hadolint/hadolint#how-to-use
   hadolint:
+    <<: *service-linter
     # For this and other development tools in container images, define the image tag to
     # follow when upgrading as the default and `./.env` controls the specific digest
     # used currently:
     image: "ghcr.io/hadolint/hadolint${DOCKER_HADOLINT_DIGEST:-:latest-debian}"
-    profiles:
-      - "lint"
-    environment:
-      TZ: "${TZ:-Etc/UTC}"
-    volumes:
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       hadolint "./build-host/Dockerfile"
 
-  reuse:
-    image: "docker.io/fsfe/reuse${DOCKER_REUSE_DIGEST:-:latest-debian}"
-    profiles:
-      - "lint"
-    user: "${PUID:-1000}:${PGID:-${PUID:-1000}}"
-    environment:
-      TZ: "${TZ:-Etc/UTC}"
-    volumes:
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
-    command: >-
-      lint
-
   vale:
+    <<: *service-linter
     image: "docker.io/jdkato/vale${DOCKER_VALE_DIGEST:-:latest}"
-    profiles:
-      - "lint"
-    user: "${PUID:-1000}:${PGID:-${PUID:-1000}}"
-    environment:
-      TZ: "${TZ:-Etc/UTC}"
-    volumes:
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       .
 
   ## Containers for simulating CI/CD:
 
   build-host:
+    <<: *service
     image: "${DOCKER_NAMESPACE:-merpatterson}/project-structure:build-host"
     profiles:
       - "ci"
@@ -70,9 +65,7 @@ services:
     privileged: true
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
+      - <<: *volume-checkout
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/init-job.sh\
         :/usr/local/bin/init-job.sh"
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/entrypoint.sh\
@@ -83,10 +76,8 @@ services:
         :${SSH_AUTH_SOCK:-/run/user/${PUID:-1000}/ssh/agent.socket}"
       - "~/.gnupg/:/home/runner/.gnupg/"
       - "/run/user/${PUID:-1000}/gnupg/S.gpg-agent:/home/runner/.gnupg/S.gpg-agent"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     env_file: "./.env"
     environment:
-      TZ: "${TZ:-Etc/UTC}"
       PUID: "${PUID:-1000}"
       PGID: "${DOCKER_GID:-${PGID:-${PUID:-1000}}}"
       SSH_AUTH_SOCK: "${SSH_AUTH_SOCK:-/run/user/${PUID:-1000}/ssh/agent.socket}"
@@ -94,6 +85,7 @@ services:
       CHECKOUT_DIR: "${CHECKOUT_DIR:-.}"
       WORKTREE_REL: "${WORKTREE_REL:-}"
       # DEBUG: "true"
+    user: "0:0"
     command: >-
       make -j -O release-all
 
