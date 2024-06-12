@@ -86,7 +86,7 @@ RUN --mount=type=cache,target=/root/.cache,sharing=locked \
 
 # Configure the VCS client for the image user:
 ARG USER_SIGNINGKEY
-RUN --mount=type=cache,target=/root/.cache,sharing=locked \
+RUN \
     git config -f "${HOME}/.gitconfig" "user.name" "CI Runner" && \
     git config -f "${HOME}/.gitconfig" "user.email" \
     "runner@build-host.${PROJECT_NAMESPACE:-rpatterson}.localhost" && \
