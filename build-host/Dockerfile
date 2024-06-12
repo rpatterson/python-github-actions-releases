@@ -46,8 +46,8 @@ CMD [ "make", "-j", "release-all" ]
 # Install the operating system packages needed to use the `./Makefile`.  Also install
 # any operating system packages the `./Makefile` might install to optimize build times:
 # hadolint ignore=DL3018
-RUN \
-    apk add --no-cache \
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apk \
+    apk add \
     "shadow" \
     "coreutils" \
     "make" \
@@ -71,8 +71,7 @@ RUN \
     "texmf-dist-latexextra" \
     "github-cli" \
     && groupdel "docker" \
-    && apk del --no-cache "shadow" \
-    && rm -rf /var/cache/apk/*
+    && apk del "shadow"
 
 # Bake external build dependencies into the image:
 # hadolint ignore=DL3042,DL4006,SC1091
