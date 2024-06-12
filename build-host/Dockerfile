@@ -39,7 +39,7 @@ ENV NVM_DIR="${HOME}/.nvm"
 ENV NVM_NODEJS_ORG_MIRROR="https://unofficial-builds.nodejs.org/download/release"
 
 ENTRYPOINT [ "docker-entrypoint.sh", "init-job.sh", "entrypoint.sh" ]
-CMD [ "make", "-e", "build-docker" ]
+CMD [ "make", "-j", "release-all" ]
 
 # More volatile layers and layers with longer build times last:
 
