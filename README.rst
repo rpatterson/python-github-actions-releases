@@ -22,7 +22,7 @@ Project Structure foundation or template
      - .. figure:: https://img.shields.io/pypi/pyversions/project-structure.svg?logo=python&label=Python&logoColor=gold
           :alt: PyPI Python versions
           :target: https://pypi.org/project/project-structure/
-     - .. figure:: https://img.shields.io/badge/code%20style-black-000000.svg
+     - .. figure:: https://img.shields.io/badge/code_style-black-000000.svg
           :alt: Python code style
           :target: https://github.com/psf/black
      - .. figure:: https://api.reuse.software/badge/gitlab.com/rpatterson/project-structure
