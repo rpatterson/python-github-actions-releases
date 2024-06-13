@@ -114,9 +114,10 @@ FROM base AS devel
 # Install operating system packages required to build the documentation:
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get install --no-install-recommends -y \
-    "texinfo=6.8-6+b1" "texlive-full=2022.20230122-3" "latexmk=1:4.79-1" \
-    "ghostscript=10.0.0~dfsg-11+deb12u4" "inkscape=1.2.2-2+b1" "pipx=1.1.0-1"
+    apt-get install --no-install-recommends -y "fonts-recommended=1" \
+	"inkscape=1.2.2-2+b1" "latexmk=1:4.79-1" "texinfo=6.8-6+b1" \
+	"texlive-latex-recommended=2022.20230122-3" "tex-gyre=20180621-6" \
+	"texlive-latex-extra=2022.20230122-4" "pipx=1.1.0-1"
 
 # Bake in tools used in the inner loop of the development cycle:
 # Find the same home directory even when run as another user, for example `root`.
