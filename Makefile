@@ -56,7 +56,9 @@ EMPTY=
 COMMA=,
 SPACE=$(EMPTY) $(EMPTY)
 # Useful to update targets only one time per run including sub-makes:
-export MAKE_RUN_UUID:=$(shell python3 -c "import uuid; print(uuid.uuid4())")
+ifeq ($(origin MAKE_RUN_UUID), undefined)
+    export MAKE_RUN_UUID:=$(shell python3 -c "import uuid; print(uuid.uuid4())")
+endif
 # Workaround missing VCS glob wildcard matches under an editor:
 # https://magit.vc/manual/magit/My-Git-hooks-work-on-the-command_002dline-but-not-inside-Magit.html
 unexport GIT_LITERAL_PATHSPECS
@@ -652,8 +654,9 @@ clean:
 	$(MAKE) "$(HOST_TARGET_DOCKER)" "./.env.~out~"
 	mkdir -pv "$(dir $(@))"
 # Workaround broken interactive session detection:
-	docker compose pull --quiet "vale" | tee -a "$(@)"
-	docker compose run --rm -T --entrypoint "true" vale | tee -a "$(@)"
+	docker compose pull --quiet "vale"
+# Create the Docker compose network a single time under parallel make:
+	docker compose run --rm -T --entrypoint "date" vale | tee -a "$(@)"
 
 # Local environment variables and secrets from a template:
 ./.env.in.~prereq~:
