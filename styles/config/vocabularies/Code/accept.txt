@@ -1,7 +1,6 @@
 SPDX
 MIT
 me
-env
 pylint
 disable
 invalid
@@ -13,7 +12,6 @@ type
 mkdir
 [Gg][Nn][Uu]
 cz
-shell
 master
 [Hh][Ee][Aa][Dd]
 VCS
@@ -45,3 +43,10 @@ via
 [Ii][Nn][Ff][Oo]
 PUID
 man
+[Ee][Nn][Vv]
+[Ff][Rr][Oo][Mm]
+[Ss][Hh][Ee][Ll][Ll]
+[Rr][Uu][Nn]
+ARG
+COPY
+LABEL
