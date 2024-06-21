@@ -49,7 +49,7 @@ FROM base AS user
 # from the project.
 
 # Put the `ENTRYPOINT` on the `$PATH`
-COPY [ "./bin/entrypoint.sh", "/usr/local/bin/" ]
+COPY --link [ "./bin/entrypoint.sh", "/usr/local/bin/" ]
 
 # Constants that create new build layers:
 ARG PROJECT_NAMESPACE=rpatterson
@@ -80,7 +80,7 @@ FROM base AS devel
 # least installing development tools.
 
 # Put the `ENTRYPOINT` on the `$PATH`
-COPY [ "./bin/entrypoint.sh", "/usr/local/bin/" ]
+COPY --link [ "./bin/entrypoint.sh", "/usr/local/bin/" ]
 
 # Constants that create new build layers:
 ARG PROJECT_NAMESPACE=rpatterson
