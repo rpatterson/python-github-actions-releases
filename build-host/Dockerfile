@@ -17,6 +17,7 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apk \
     apk add \
     "shadow" \
     "coreutils" \
+    "diffutils" \
     "make" \
     "bash" \
     "su-exec" \
