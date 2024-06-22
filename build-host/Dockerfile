@@ -17,6 +17,7 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apk \
     apk add \
     "shadow" \
     "coreutils" \
+    "diffutils" \
     "make" \
     "bash" \
     "su-exec" \
@@ -52,8 +53,8 @@ RUN --mount=type=cache,target=/root/.cache,sharing=locked \
     pipx install "tox==4.11.3" && \
     wget -qO- "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh" | \
         bash && \
-    echo 'nvm_get_arch() { nvm_echo x64-musl; }' >>"${HOME}/.nvm/nvm.sh" && \
-	. "${HOME}/.nvm/nvm.sh" || true && \
+    echo 'nvm_get_arch() { nvm_echo x64-musl; }' >>"${HOME}/.nvm/nvm.sh" && set +u && \
+	. "${HOME}/.nvm/nvm.sh" || true && set -u && \
     nvm install "20"
 
 # Layers that don't vary between projects next:

@@ -56,7 +56,9 @@ EMPTY=
 COMMA=,
 SPACE=$(EMPTY) $(EMPTY)
 # Useful to update targets only one time per run including sub-makes:
-export MAKE_RUN_UUID:=$(shell python3 -c "import uuid; print(uuid.uuid4())")
+ifeq ($(origin MAKE_RUN_UUID), undefined)
+    export MAKE_RUN_UUID:=$(shell python3 -c "import uuid; print(uuid.uuid4())")
+endif
 # Workaround missing VCS glob wildcard matches under an editor:
 # https://magit.vc/manual/magit/My-Git-hooks-work-on-the-command_002dline-but-not-inside-Magit.html
 unexport GIT_LITERAL_PATHSPECS
@@ -836,7 +838,7 @@ devel-upgrade:
 	touch ./requirements/*.txt.in "./.env.in.~prereq~" "./.vale.ini" ./styles/*.ini
 	$(MAKE) PIP_COMPILE_ARGS="--upgrade" DOCKER_COMPOSE_UPGRADE=true \
 	    "./requirements/$(PYTHON_HOST_ENV)/build.txt" devel-upgrade-pre-commit \
-	    devel-upgrade-js "./var/log/vale-rule-levels.log"
+	    devel-upgrade-js "./.env.~out~" "./var/log/vale-rule-levels.log"
 .PHONY: devel-upgrade-pre-commit
 ## Update VCS integration from remotes to the most recent tag.
 devel-upgrade-pre-commit: ./.tox/build/.tox-info.json
@@ -996,9 +998,9 @@ $(HOME)/.local/state/docker-multi-platform/log/host-install.log:
 	$(MAKE) "$(HOST_TARGET_DOCKER)" "./.env.~out~"
 	mkdir -pv "$(dir $(@))"
 # Workaround broken interactive session detection:
-	docker compose pull --quiet "vale" | tee -a "$(@)"
+	docker compose pull --quiet "vale"
 # Create the Docker compose network a single time under parallel make:
-	$(DOCKER_COMPOSE_RUN_CMD) --entrypoint "true" vale | tee -a "$(@)"
+	$(DOCKER_COMPOSE_RUN_CMD) --entrypoint "date" vale | tee -a "$(@)"
 # Create any mount points for bind volumes that `# dockerd` shouldn't or can't create,
 # such as directory bind volumes that root shouldn't own by or file bind volumes that `#
 # dockerd` shouldn't create as directories:
