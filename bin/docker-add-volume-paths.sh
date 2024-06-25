@@ -24,15 +24,20 @@ main() {
     target_prefix="${1}"
     shift
 
-    docker_services="$(sed -nE 's#^  ([^ :]+): *$#\1#p' ./compose*.yml)"
+    compose_args="docker compose $(
+        for profile in $(docker compose config --profiles)
+	do
+	    echo "--profile ${profile}"
+	done
+    )"
     if test "${DEBUG}" = "true"
     then
-	docker compose config ${docker_services} >&2
+	${compose_args} config >&2
     fi
     (
-	docker compose config ${docker_services} |
+	${compose_args} config |
 	    sed -nE -e "s#^ *source: *${source_prefix}/(.+)#\1#p" &&
-	    docker compose config ${docker_services} |
+	    ${compose_args} config |
 	        sed -nE -e "s#^ *target: *${target_prefix}/(.+)#\1#p"
     ) | sort | uniq | while read "docker_volume_path"
     do
