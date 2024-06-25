@@ -73,8 +73,8 @@ services:
       # DEBUG: "true"
     volumes:
       # Reflect local changes inside the container:
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/bin/entrypoint.sh\
-        :/usr/local/bin/entrypoint.sh"
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/container/usr/local/bin/entrypoint.sh\
+        :/usr/local/container/usr/local/bin/entrypoint.sh"
       - <<: *volume-checkout-service
       # Avoid any clashes between image variants and the local host at both build and
       # runtime.
@@ -157,9 +157,11 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - <<: *volume-checkout-service
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/init-job.sh\
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/container\
+        /usr/local/bin/init-job.sh\
         :/usr/local/bin/init-job.sh"
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/entrypoint.sh\
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/container\
+        /usr/local/bin/entrypoint.sh\
         :/usr/local/bin/entrypoint.sh"
       # Share local authentication inside the container:
       - "~/.ssh/:/home/runner/.ssh/"

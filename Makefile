@@ -925,7 +925,8 @@ clean:
 # Build Docker container images:
 # Build the base layer common to both published images:
 define build_docker_base_template=
-./var-docker/$(1)/log/build-base.log: ./Dockerfile ./bin/entrypoint.sh \
+./var-docker/$(1)/log/build-base.log: \
+		./Dockerfile ./container/usr/local/bin/entrypoint.sh \
 		./.tox/build/.tox-info.json \
 		$$(HOME)/.local/state/docker-multi-platform/log/host-install.log \
 		./var/log/docker-login-DOCKER.log

@@ -15,11 +15,6 @@ TEMPLATE: clear items and add items for your project.
 Required
 ****************************************************************************************
 
-#. ``docker``: Add ``HEALTHCHECK`` template to ``./Dockerfile``.
-
-#. ``py-docker``: Missing ``LABEL`` tag: ``"org.opencontainers.image.base.name":
-   "docker.io/library/python:"``
-
 #. ``base``: Add an Open Collective badge.
 
 #. ``(js|ts|etc.)``: Restore `general and module Sphinx indexes
