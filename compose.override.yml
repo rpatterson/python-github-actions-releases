@@ -74,7 +74,9 @@ services:
     volumes:
       # Reflect local changes inside the container:
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/container/usr/local/bin/entrypoint.sh\
-        :/usr/local/container/usr/local/bin/entrypoint.sh"
+        :/usr/local/bin/entrypoint.sh"
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/container/usr/local/bin/healthcheck.sh\
+        :/usr/local/bin/healthcheck.sh"
       - <<: *volume-checkout-service
       # Avoid any clashes between image variants and the local host at both build and
       # runtime.

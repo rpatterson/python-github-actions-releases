@@ -38,6 +38,8 @@ LABEL org.opencontainers.image.base.name="docker.io/library/buildpack-deps:stabl
 # Container runtime environment:
 ENTRYPOINT [ "entrypoint.sh" ]
 CMD [ "bash" ]
+HEALTHCHECK CMD \
+    healthcheck.sh || exit 1
 
 
 ## Container image for use by end users.
@@ -146,3 +148,4 @@ WORKDIR "/usr/local/src/${PROJECT_NAME}/"
 # - `LABEL`
 # - `ENTRYPOINT`
 # - `CMD`
+# - `HEALTHCHECK`
