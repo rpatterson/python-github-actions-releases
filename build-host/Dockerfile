@@ -98,4 +98,4 @@ RUN \
     git config --global user.signingkey "${USER_SIGNINGKEY}" && \
     mkdir -pv "${HOME}/.local/state/${PROJECT_NAME}/log/"
 
-COPY [ "./bin/init-job.sh",  "./bin/entrypoint.sh", "/usr/local/bin/" ]
+COPY --link [ "./container/", "/" ]
