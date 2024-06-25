@@ -24,7 +24,7 @@ main() {
     target_prefix="${1}"
     shift
 
-    docker_services="$(sed -nE 's#^  ([^ :]+): *$#\1#p' ./docker-compose*.yml)"
+    docker_services="$(sed -nE 's#^  ([^ :]+): *$#\1#p' ./compose*.yml)"
     if test "${DEBUG}" = "true"
     then
 	docker compose config ${docker_services} >&2

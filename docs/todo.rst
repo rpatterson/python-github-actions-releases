@@ -96,12 +96,12 @@ Nice to have
    to some form of filesystem archive. This means following runs of the image tag might
    use a different image than the one built locally. Someone else could have pushed
    another build to the registry between the push and following pull. Even worse,
-   changing the ``platform: ...`` in ``./docker-compose*.yml`` requires a ``$ docker
+   changing the ``platform: ...`` in ``./compose*.yml`` requires a ``$ docker
    compose pull ...`` to switch the image. This means pulling again and again some time
    after the push increasingly the likelihood of pulling an image other than the one
    built locally. This leaves a couple options. Parse the manifest digest from the build
    output and then use that to retrieve the digests for each platform's image and then
-   use those digests in ``./docker-compose*.yml``. Or output the multi-platform image to
+   use those digests in ``./compose*.yml``. Or output the multi-platform image to
    one of the local filesystem formats, figure how to import from there and do a similar
    dance to retrieve and use the digests. This would be fragile and would take a lot of
    work that is likely wasted effort when Docker or someone else provides a better
