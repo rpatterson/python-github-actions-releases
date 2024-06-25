@@ -3,7 +3,7 @@
 .. SPDX-License-Identifier: MIT
 
 .. image:: ./docs/_static/logo-120.png
-.. include-above-contents-start
+.. include-before-contents-start
 
 ########################################################################################
 Project Structure
@@ -122,9 +122,9 @@ variants. Real projects can also merge those changes.
 .. _`Organize source by feature`:
    https://www.seancdavis.com/posts/organize-components-by-keeping-related-files-close/
 
-.. include-above-contents-end
+.. include-before-contents-end
 .. contents:: Table of Contents
-.. include-below-contents-start
+.. include-after-contents-start
 
 
 ****************************************************************************************
@@ -236,7 +236,7 @@ Installation
 
 Install locally or use the Docker container image:
 
-Local Installation
+Local installation
 ========================================================================================
 
 Use a package manager for the project language to install locally::
@@ -245,11 +245,11 @@ Use a package manager for the project language to install locally::
 
   $ true "TEMPLATE: Always specific to the project type"
 
-Docker Container Image
+Docker container image
 ========================================================================================
 
 The recommended way to use the container image is by using `Docker Compose`_. See `the
-example ./docker-compose.yml file`_. Write your configuration and run the container::
+example ./compose.yml file`_. Write your configuration and run the container::
 
   $ docker compose up
 
@@ -321,8 +321,8 @@ References
    https://project-structure.readthedocs.io/en/latest/contributing.html
 
 .. _`Docker Compose`: https://docs.docker.com/compose/
-.. _`the example ./docker-compose.yml file`:
-   https://gitlab.com/rpatterson/project-structure/-/blob/main/docker-compose.yml
+.. _`the example ./compose.yml file`:
+   https://gitlab.com/rpatterson/project-structure/-/blob/main/compose.yml
 .. _the Docker image: https://hub.docker.com/r/merpatterson/project-structure
 
 .. _`GitLab hosts this project`:

@@ -30,27 +30,28 @@ services:
       - type: "volume"
         source: "home_cache"
         target: "/home/project-structure/.cache"
+      # Preserve shell history inside containers, requires `$ touch
+      # ./home/.bash_history`:
+      - "./home/.bash_history:/home/project-structure/.bash_history"
 
 volumes:
   # Share user `${HOME}` data between services but isolated within the project:
-  home_config:
+  home_config: &volume-bind
     name: "${PROJECT_NAME:-prunerr}_home_config"
     driver: "local"
-    driver_opts:
+    driver_opts: &volume-bind-opts
       type: "none"
       o: "bind"
       device: "${CHECKOUT_DIR:-.}/home/.config/"
   home_local_share:
+    <<: *volume-bind
     name: "${PROJECT_NAME:-prunerr}_home_local_share"
-    driver: "local"
     driver_opts:
-      type: "none"
-      o: "bind"
+      <<: *volume-bind-opts
       device: "${CHECKOUT_DIR:-.}/home/.local/share/"
   home_cache:
+    <<: *volume-bind
     name: "${PROJECT_NAME:-prunerr}_home_cache"
-    driver: "local"
     driver_opts:
-      type: "none"
-      o: "bind"
+      <<: *volume-bind-opts
       device: "${CHECKOUT_DIR:-.}/home/.cache/"
