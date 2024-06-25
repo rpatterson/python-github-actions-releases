@@ -48,7 +48,7 @@ ENV NVM_NODEJS_ORG_MIRROR="https://unofficial-builds.nodejs.org/download/release
 # Prevent Node Version Manager (NVM) installing into `/bin/versions/**`:
 ENV HOME="/home/runner"
 ENV NVM_DIR="${HOME}/.nvm"
-COPY [ "./bin/install-codecov.sh", "${HOME}/.local/bin/" ]
+COPY [ "./container/usr/local/bin/install-codecov.sh", "/usr/local/bin/" ]
 # hadolint ignore=DL3042,DL4006,SC1091
 RUN --mount=type=cache,target=/root/.cache,sharing=locked \
     pipx install "tox==4.11.3" && \
@@ -57,7 +57,7 @@ RUN --mount=type=cache,target=/root/.cache,sharing=locked \
     echo 'nvm_get_arch() { nvm_echo x64-musl; }' >>"${HOME}/.nvm/nvm.sh" && set +u && \
 	. "${HOME}/.nvm/nvm.sh" || true && set -u && \
     nvm install "20" && \
-    ${HOME}/.local/bin/install-codecov.sh
+    install-codecov.sh
 
 # Layers that don't vary between projects next:
 

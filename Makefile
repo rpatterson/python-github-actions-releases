@@ -1530,7 +1530,9 @@ $(STATE_DIR)/log/host-update.log:
 	date | tee -a "$(@)"
 
 # Install the code test coverage publishing tool:
-$(HOME)/.local/bin/codecov: ./build-host/bin/install-codecov.sh $(HOST_PREFIX)/bin/curl
+$(HOME)/.local/bin/codecov: \
+		./build-host/container/usr/local/bin/install-codecov.sh \
+		$(HOST_PREFIX)/bin/curl
 	"$(<)"
 $(HOST_PREFIX)/bin/curl:
 	$(MAKE) "$(STATE_DIR)/log/host-update.log"
