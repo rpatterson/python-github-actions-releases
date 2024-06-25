@@ -58,7 +58,9 @@ EMPTY=
 COMMA=,
 SPACE=$(EMPTY) $(EMPTY)
 # Useful to update targets only one time per run including sub-makes:
-export MAKE_RUN_UUID:=$(shell python3 -c "import uuid; print(uuid.uuid4())")
+ifeq ($(origin MAKE_RUN_UUID), undefined)
+    export MAKE_RUN_UUID:=$(shell python3 -c "import uuid; print(uuid.uuid4())")
+endif
 # Workaround missing VCS glob wildcard matches under an editor:
 # https://magit.vc/manual/magit/My-Git-hooks-work-on-the-command_002dline-but-not-inside-Magit.html
 unexport GIT_LITERAL_PATHSPECS
@@ -236,6 +238,9 @@ export PYPI_PASSWORD
 TEST_PYPI_PASSWORD?=
 export TEST_PYPI_PASSWORD
 
+# Variables related to tools managed by `./*compose*.yml`:
+DOCKER_COMPOSE_UPGRADE=false
+
 # https://www.sphinx-doc.org/en/master/usage/builders/index.html
 # Run these Sphinx builders to test the correctness of the documentation:
 # <!--alex disable gals-man-->
@@ -243,6 +248,7 @@ DOCS_SPHINX_BUILDERS=html dirhtml singlehtml htmlhelp qthelp epub applehelp late
     texinfo text gettext linkcheck xml pseudoxml
 DOCS_SPHINX_ALL_FORMATS=$(DOCS_SPHINX_BUILDERS) devhelp pdf info
 # <!--alex enable gals-man-->
+DOCS_SPHINX_BUILD_OPTS=
 # These builders report false warnings or failures:
 
 # Override variable values if present in `./.env` and if not overridden on the
@@ -324,7 +330,7 @@ $(DOCS_SPHINX_BUILDERS:%=build-docs-%): ./.tox/$(PYTHON_HOST_ENV)/.tox-info.json
 build-docs-pdf: build-docs-latex
 # TODO: Switch to a TeX Live container for SVG support.
 	$(MAKE) -C "./build/docs/$(<:build-docs-%=%)/" \
-	    LATEXMKOPTS="-f -interaction=nonstopmode" all-pdf || true
+	    LATEXMKOPTS="-f -interaction=nonstopmode" all-pdf
 .PHONY: build-docs-info
 ## Render the Texinfo documentation into a `*.info` file.
 build-docs-info: build-docs-texinfo
@@ -643,7 +649,7 @@ devel-upgrade:
 	touch ./requirements/*.txt.in "./.env.in.~prereq~" "./.vale.ini" ./styles/*.ini
 	$(MAKE) PIP_COMPILE_ARGS="--upgrade" DOCKER_COMPOSE_UPGRADE=true \
 	    $(PYTHON_ENVS:%=build-requirements-%) devel-upgrade-pre-commit \
-	    devel-upgrade-js "./var/log/vale-rule-levels.log"
+	    devel-upgrade-js "./.env.~out~" "./var/log/vale-rule-levels.log"
 .PHONY: devel-upgrade-pre-commit
 ## Update VCS integration from remotes to the most recent tag.
 devel-upgrade-pre-commit: ./.tox/build/.tox-info.json
@@ -754,15 +760,16 @@ $(foreach python_env,$(PYTHON_ENVS),\
 	$(MAKE) "$(HOST_TARGET_DOCKER)" "./.env.~out~"
 	mkdir -pv "$(dir $(@))"
 # Workaround broken interactive session detection:
-	docker compose pull --quiet "vale" | tee -a "$(@)"
-	docker compose run --rm -T --entrypoint "true" vale | tee -a "$(@)"
+	docker compose pull --quiet "vale"
+# Create the Docker compose network a single time under parallel make:
+	docker compose run --rm -T --entrypoint "date" vale | tee -a "$(@)"
 
 # Local environment variables and secrets from a template:
 ./.env.in.~prereq~:
 	touch "$(@)"
 ./.env.in: ./.env.in.~prereq~
 ifeq ($(DOCKER_COMPOSE_UPGRADE),true)
-# Define the image tag to track in `./docker-compose*.yml` in the default values for the
+# Define the image tag to track in `./compose*.yml` in the default values for the
 # `${DOCKER_*_DIGEST}` environment variables and track the locked/frozen image digests
 # in `./.env.in` in VCS:
 #

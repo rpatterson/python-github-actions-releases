@@ -1,2 +1,8 @@
 # https://towncrier.readthedocs.io/en/stable/tutorial.html#configuration
 !.git*
+
+# Workaround Towncrier considering editor backup files as duplicate release notes:
+#     ValueError: multiple files for +default-python.feature in
+#     /srv/checkouts/ubuntu/usr/local/src/project-structure/newsfragments/
+# Let the untracked files in VCS status prompt the developer to clean them up.
+!/*~
