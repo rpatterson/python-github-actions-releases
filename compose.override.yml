@@ -38,7 +38,9 @@ services:
     # For this and other development tools in container images, define the image tag to
     # follow when upgrading as the default and `./.env` controls the specific digest
     # used currently:
-    image: "ghcr.io/hadolint/hadolint${DOCKER_HADOLINT_DIGEST:-:latest-debian}"
+    image: "\
+      registry.gitlab.com/pipeline-components/hadolint\
+      ${DOCKER_HADOLINT_DIGEST:-:latest}"
     command: >-
       hadolint "./build-host/Dockerfile"
 
