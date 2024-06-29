@@ -8,7 +8,9 @@
 ## Image layers shared between all variants.
 
 # Stay as close to an un-customized environment as possible:
-FROM buildpack-deps:stable AS base
+ARG DOCKER_BASE_DIGEST=":stable"
+# hadolint ignore=DL3006
+FROM buildpack-deps${DOCKER_BASE_DIGEST} AS base
 # Defensive shell options:
 SHELL ["/bin/bash", "-eu", "-o", "pipefail", "-c"]
 
@@ -18,10 +20,12 @@ RUN \
     rm -f /etc/apt/apt.conf.d/docker-clean && \
     echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' \
     >"/etc/apt/apt.conf.d/keep-cache"
+COPY [ "./apt/base-lock.txt", "/etc/apt/" ]
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && \
-    apt-get install --no-install-recommends -y "gosu=1.14-1+b6"
+    apt-get update && xargs -t -- \
+    apt-get install --no-install-recommends -y <"/etc/apt/base-lock.txt" && \
+    rm -v "/etc/apt/base-lock.txt"
 
 # Constant layers, those without variable substitution, where changes don't invalidate
 # later build caches:

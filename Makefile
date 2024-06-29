@@ -206,6 +206,7 @@ DOCKER_DEFAULT=$(DOCKER_OS_DEFAULT)-$(DOCKER_LANGUAGE_DEFAULT)
 endif
 export DOCKER_VARIANT?=$(firstword $(DOCKER_VARIANTS))
 export DOCKER_BRANCH_TAG=$(subst /,-,$(VCS_BRANCH))
+DOCKER_DEFAULT_TAG=$(DOCKER_DEFAULT)-$(DOCKER_BRANCH_TAG)
 DOCKER_REGISTRIES=DOCKER
 export DOCKER_REGISTRY=$(firstword $(DOCKER_REGISTRIES))
 DOCKER_IMAGE_DOCKER=$(DOCKER_NAMESPACE)/$(PROJECT_NAME)
@@ -214,6 +215,8 @@ export DOCKER_PASS?=
 DOCKER_COMPOSE_RUN_CMD=docker compose run --rm -T --quiet-pull
 DOCKER_COMPOSE_UPGRADE=false
 TEST_CODE_PREREQS=./var/log/build-pkgs.log
+
+APT_LOCK_FILES=$(wildcard ./apt/*-lock.txt)
 
 # Values used for publishing releases:
 # Safe defaults for testing the release process without publishing to the official
@@ -447,6 +450,7 @@ endif
 # https://github.com/moby/moby/issues/39003#issuecomment-879441675
 	docker buildx build --progress plain $(DOCKER_BUILD_ARGS) \
 	    --build-arg BUILDKIT_INLINE_CACHE="1" \
+	    --build-arg DOCKER_BASE_DIGEST="$(DOCKER_BASE_DIGEST)" \
 	    --build-arg VERSION="$$(
 	        tox exec -e "build" -qq -- cz version --project
 	    )" $${docker_build_args} --file "$(<)" "./"
@@ -547,7 +551,7 @@ test-lint-prose: test-lint-prose-vale-markup test-lint-prose-vale-code \
 test-lint-prose-vale-markup: ./var/log/docker-compose-network.log
 # https://vale.sh/docs/topics/scoping/#formats
 	git ls-files -co --exclude-standard -z ':!docs/news*.rst' ':!LICENSES' \
-	    ':!styles/**' ':!requirements/**' |
+	    ':!styles/**' ':!requirements/**' ':!apt/*-lock.txt' |
 	    xargs -r -0 -t -- $(DOCKER_COMPOSE_RUN_CMD) vale
 .PHONY: test-lint-prose-vale-code
 ## Lint comment prose in all source code files tracked in VCS with Vale.
@@ -817,7 +821,7 @@ devel-format: ./var/log/docker-compose-network.log ./var/log/npm-install.log
 # Add license and copyright header to files missing them:
 	git ls-files -co --exclude-standard -z ':!*.license' ':!.reuse' ':!LICENSES' \
 	    ':!newsfragments/*' ':!docs/news*.rst' ':!styles/**' \
-	    ':!requirements/*/*.txt' |
+	    ':!requirements/*/*.txt' ':!apt/*-lock.txt' |
 	while read -d $$'\0'
 	do
 	    if ! (
@@ -836,10 +840,11 @@ devel-format: ./var/log/docker-compose-network.log ./var/log/npm-install.log
 .PHONY: devel-upgrade
 ## Update requirements, dependencies, and other external versions tracked in VCS.
 devel-upgrade:
-	touch ./requirements/*.txt.in "./.env.in.~prereq~" "./.vale.ini" ./styles/*.ini
+	touch ./requirements/*.txt.in ./apt/*-lock.txt "./.env.in.~prereq~" "./.vale.ini" ./styles/*.ini
 	$(MAKE) PIP_COMPILE_ARGS="--upgrade" DOCKER_COMPOSE_UPGRADE=true \
 	    "./requirements/$(PYTHON_HOST_ENV)/build.txt" devel-upgrade-pre-commit \
-	    devel-upgrade-js "./.env.~out~" "./var/log/vale-rule-levels.log"
+	    devel-upgrade-js "./.env.~out~" devel-upgrade-apt \
+	    "./var/log/vale-rule-levels.log"
 .PHONY: devel-upgrade-pre-commit
 ## Update VCS integration from remotes to the most recent tag.
 devel-upgrade-pre-commit: ./.tox/build/.tox-info.json
@@ -849,11 +854,14 @@ devel-upgrade-pre-commit: ./.tox/build/.tox-info.json
 devel-upgrade-js: ./var/log/npm-install.log
 	~/.nvm/nvm-exec npm update
 	~/.nvm/nvm-exec npm outdated
-.PHONY: devel-upgrade-docker
+.PHONY: devel-upgrade-compose
 ## Update the container images of development tools.
-devel-upgrade-docker: $(HOST_TARGET_DOCKER)
+devel-upgrade-compose: $(HOST_TARGET_DOCKER)
 	touch "./.env.in.~prereq~"
 	$(MAKE) DOCKER_COMPOSE_UPGRADE=true "./.env.~out~"
+.PHONY: devel-upgrade-apt
+## Update the versions of APT packages installed into the container image:
+devel-upgrade-apt: $(APT_LOCK_FILES)
 
 .PHONY: devel-upgrade-branch
 ## Reset an upgrade branch, commit upgraded dependencies on it, and push for review.
@@ -866,7 +874,7 @@ devel-upgrade-branch: ./var/log/git-fetch.log test-clean
 	    exit
 	fi
 # Only add changes related to the upgrades:
-	git add --update '.env.in' './requirements/*/*.txt' \
+	git add --update '.env.in' './requirements/*/*.txt' './apt/*-lock.txt' \
 	    "./.pre-commit-config.yaml" "./package-lock.json" "./.vale.ini"
 	git add "./styles/"
 # Commit the upgrade changes
@@ -921,6 +929,16 @@ clean:
 	mkdir -pv "$(dir $(@))"
 	$(DOCKER_COMPOSE_RUN_CMD) $(PROJECT_NAME)-devel \
 	    echo "TEMPLATE: Always specific to the project type" | tee -a "$(@)"
+
+# Lock installed operating system package versions for reproducible image builds:
+define devel_upgrade_apt_template=
+$(1): ./var-docker/$(DOCKER_DEFAULT)/log/build-$(1:./apt/%-lock.txt=%).log
+	docker run --rm --entrypoint "dpkg-query" \
+	    $$(DOCKER_IMAGE):$(1:./apt/%-lock.txt=%)-$$(DOCKER_DEFAULT_TAG) \
+	    -f='$$$${binary:Package}=$$$${Version}\n' -W >"$$(@)"
+endef
+$(foreach lock_file,$(APT_LOCK_FILES),\
+    $(eval $(call devel_upgrade_apt_template,$(lock_file))))
 
 # Build Docker container images:
 # Build the base layer common to both published images:

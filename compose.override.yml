@@ -84,6 +84,12 @@ services:
         :/usr/local/src/project-structure${WORKTREE_REL:-}/var/"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
 
+  base:
+    <<: *service
+    image: "docker.io/buildpack-deps${DOCKER_BASE_DIGEST:-:stable}"
+    profiles:
+      - "devel"
+
   reuse:
     <<: *service-linter
     image: "docker.io/fsfe/reuse${DOCKER_REUSE_DIGEST:-:latest-debian}"
