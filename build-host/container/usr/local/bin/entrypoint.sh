@@ -1,17 +1,17 @@
 #!/bin/bash
+#
+# Shared set up for local testing of CI/CD
 
 # SPDX-FileCopyrightText: 2023 Ross Patterson <me@rpatterson.net>
 #
 # SPDX-License-Identifier: MIT
 
-# Shared set up for local testing of CI/CD
-
 set -eu -o pipefail
+export PS4='+$(basename "${0}"):${LINENO}+'
 if test "${DEBUG:=false}" = "true"
 then
     # Echo commands for easier debugging
     set -x
-    PS4='${0}:${LINENO}+'
 fi
 
 

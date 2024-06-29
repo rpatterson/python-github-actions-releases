@@ -508,7 +508,7 @@ test-lint-licenses: ./var/log/docker-compose-network.log
 test-lint-code: test-lint-code-prettier
 .PHONY: test-lint-code-prettier
 ## Lint source code for formatting with Prettier.
-test-lint-code-prettier: ./var/log/npm-install.log
+test-lint-code-prettier: ./var/log/npm-install.log ./var/log/build-pkgs.log
 	~/.nvm/nvm-exec npm run lint:prettier
 
 .PHONY: test-lint-docs
