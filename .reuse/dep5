@@ -30,3 +30,10 @@ Comment:
  Version pins/locks/freezes that [Pip
  Tools](https://pip-tools.readthedocs.io/en/latest/) manage and are thus inappropriate
  for header annotations/commments.
+
+Files:
+  apt/*-lock.txt
+Copyright: 2023 Ross Patterson <me@rpatterson.net>
+License: MIT
+Comment:
+ Version locks for APT packages installed into the container images.

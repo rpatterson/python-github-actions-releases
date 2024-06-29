@@ -52,6 +52,7 @@ ARG
 COPY
 LABEL
 HEALTHCHECK
+[Aa][Pp][Tt]
 junit
 failure
 [Cc]odecov

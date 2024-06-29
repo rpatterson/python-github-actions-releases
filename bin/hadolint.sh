@@ -1,17 +1,17 @@
 #!/bin/bash
+#
+# Wrapper for running the Dockerfile linter in a container.
 
 # SPDX-FileCopyrightText: 2023 Ross Patterson <me@rpatterson.net>
 #
 # SPDX-License-Identifier: MIT
 
-# Wrapper for running the Dockerfile linter in a container.
-
 set -eu -o pipefail
 shopt -s inherit_errexit
+export PS4='+$(basename "${0}"):${LINENO}+'
 if test -n "${DEBUG:=}"
 then
     # Echo commands for easier debugging
-    PS4='$0:$LINENO+'
     set -x
 fi
 

@@ -1,20 +1,20 @@
 #!/bin/bash
+#
+# Add files tracked in VCS for any bind volume paths that have none.
+#
+# Useful so that `# dockerd` doesn't create them as `root`.
 
 # SPDX-FileCopyrightText: 2023 Ross Patterson <me@rpatterson.net>
 #
 # SPDX-License-Identifier: MIT
 
-# Add files tracked in VCS for any bind volume paths that have none.
-#
-# Useful so that `# dockerd` doesn't create them as `root`.
-
 set -eu -o pipefail
 shopt -s inherit_errexit
+export PS4='+$(basename "${0}"):${LINENO}+'
 if test "${DEBUG:=false}" = "true"
 then
     # Echo commands for easier debugging
     set -x
-    PS4='$0:$LINENO+'
 fi
 
 
