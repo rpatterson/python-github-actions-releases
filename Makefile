@@ -1210,7 +1210,7 @@ $(foreach variant,$(DOCKER_VARIANTS),\
 # Build the development image in which to compile frozen, or pinned, versions:
 define build_docker_bootstrap_template=
 ./var-docker/$$(DOCKER_OS_DEFAULT)-$(1)/log/build-bootstrap.log: ./Dockerfile \
-		./bin/entrypoint.sh \
+		./container/usr/local/bin/entrypoint.sh \
 		$$(HOME)/.local/state/docker-multi-platform/log/host-install.log \
 		./var/log/docker-login-DOCKER.log
 	true DEBUG Updated prereqs: $$(?)

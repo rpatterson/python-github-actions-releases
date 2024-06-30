@@ -27,16 +27,6 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apk \
     "pipx" \
     "gnupg" \
     "curl" \
-    "imagemagick" \
-    "librsvg" \
-    "texlive-luatex" \
-    "texmf-dist-binextra" \
-    "texinfo" \
-    "texmf-dist-latex" \
-    "texmf-dist-lang" \
-    "texmf-dist-latexrecommended" \
-    "texmf-dist-fontsrecommended" \
-    "texmf-dist-latexextra" \
     "github-cli" \
     && groupdel "docker" \
     && apk del "shadow"

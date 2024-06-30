@@ -57,11 +57,13 @@ FROM base AS user
 
 # Install dependencies with fixed versions in a separate layer to optimize build times
 # because this step takes the most time and changes the least often:
+ARG PROJECT_NAMESPACE=rpatterson
+ARG PROJECT_NAME=project-structure
 # Activate the Python virtual environment:
 ARG PYTHON_ENV=py312
-COPY [ "./requirements/${PYTHON_ENV}/user.txt", "./requirements.txt" ]
 ENV VIRTUAL_ENV="/opt/${PROJECT_NAMESPACE}/${PROJECT_NAME}"
 WORKDIR "${VIRTUAL_ENV}"
+COPY [ "./requirements/${PYTHON_ENV}/user.txt", "./requirements.txt" ]
 # hadolint ignore=DL3042,SC1091
 RUN --mount=type=cache,target=/root/.cache,sharing=locked \
     python3 -m "venv" "./" && \
@@ -78,14 +80,15 @@ RUN --mount=type=cache,target=/root/.cache,sharing=locked \
     source "./bin/activate" && \
     pip3 install "${PYTHON_WHEEL}" && \
     rm -rv "./dist/"
+# Find the same home directory even when run as another user, for example `root`.
+ENV HOME="/home/${PROJECT_NAME}"
 WORKDIR "${HOME}"
 
 # Put the `ENTRYPOINT` on the `$PATH`
 COPY --link [ "./container/", "/" ]
 
 # Constants that create new build layers:
-ARG PROJECT_NAMESPACE=rpatterson
-ARG PROJECT_NAME=project-structure
+ARG PYTHON_MINOR=3.12
 ARG VERSION=
 
 # Image metadata:
@@ -97,9 +100,6 @@ LABEL org.opencontainers.image.version=${VERSION}
 # Container runtime environment:
 ENV PROJECT_NAMESPACE="${PROJECT_NAMESPACE}"
 ENV PROJECT_NAME="${PROJECT_NAME}"
-# Find the same home directory even when run as another user, for example `root`.
-ENV HOME="/home/${PROJECT_NAME}"
-ENV VIRTUAL_ENV="/opt/${PROJECT_NAMESPACE}/${PROJECT_NAME}"
 ENV PATH="${VIRTUAL_ENV}/bin:${HOME}/.local/bin:${PATH}"
 # Python-specific environment:
 ENV PYTHON_MINOR="${PYTHON_MINOR}"
@@ -119,8 +119,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     "ghostscript=10.0.0~dfsg-11+deb12u4" "inkscape=1.2.2-2+b1" "pipx=1.1.0-1"
 
 # Bake in tools used in the inner loop of the development cycle:
+# Find the same home directory even when run as another user, for example `root`.
+ARG PROJECT_NAME=project-structure
+ENV HOME="/home/${PROJECT_NAME}"
 # Install tox in the unprivileged user's `${HOME}`:
-ENV PIPX_HOME="/${HOME}/.local/pipx"
+ENV PIPX_HOME="${HOME}/.local/pipx"
 # hadolint ignore=DL3042
 RUN --mount=type=cache,target=/root/.cache,sharing=locked \
     pipx install "tox==4.11.3"
@@ -130,7 +133,7 @@ COPY --link [ "./container/", "/" ]
 
 # Constants that create new build layers:
 ARG PROJECT_NAMESPACE=rpatterson
-ARG PROJECT_NAME=project-structure
+ARG PYTHON_MINOR=3.12
 ARG VERSION=
 
 # Image metadata:
@@ -144,13 +147,13 @@ LABEL org.opencontainers.image.version=${VERSION}
 # Container runtime environment:
 ENV PROJECT_NAMESPACE="${PROJECT_NAMESPACE}"
 ENV PROJECT_NAME="${PROJECT_NAME}"
-# Find the same home directory even when run as another user, for example `root`.
-ENV HOME="/home/${PROJECT_NAME}"
 # Activate the Python virtual environment:
 ARG PYTHON_ENV=py312
+ENV PYTHON_ENV="${PYTHON_ENV}"
 ENV VIRTUAL_ENV="/usr/local/src/${PROJECT_NAME}/.tox/${PYTHON_ENV}"
 ENV PATH="${VIRTUAL_ENV}/bin:${HOME}/.local/bin:${PATH}"
 # Set any environment variables used as options in the `./Makefile`:
+ENV PYTHON_MINOR="${PYTHON_MINOR}"
 ENV PYTHON_MINORS="${PYTHON_MINOR}"
 # Remain in the checkout `WORKDIR` and make the build tools the default
 # command to run.

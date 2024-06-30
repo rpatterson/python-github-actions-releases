@@ -48,7 +48,7 @@ man
 [Ss][Hh][Ee][Ll][Ll]
 [Rr][Uu][Nn]
 ARG
-COPY
+[Cc][Oo][Pp][Yy]
 LABEL
 HEALTHCHECK
 [Aa][Pp][Tt]
