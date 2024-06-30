@@ -58,7 +58,9 @@ EMPTY=
 COMMA=,
 SPACE=$(EMPTY) $(EMPTY)
 # Useful to update targets only one time per run including sub-makes:
-export MAKE_RUN_UUID:=$(shell python3 -c "import uuid; print(uuid.uuid4())")
+ifeq ($(origin MAKE_RUN_UUID), undefined)
+    export MAKE_RUN_UUID:=$(shell python3 -c "import uuid; print(uuid.uuid4())")
+endif
 # Workaround missing VCS glob wildcard matches under an editor:
 # https://magit.vc/manual/magit/My-Git-hooks-work-on-the-command_002dline-but-not-inside-Magit.html
 unexport GIT_LITERAL_PATHSPECS
@@ -226,6 +228,7 @@ DOCKER_VARIANT_HOST=$(DOCKER_OS_DEFAULT)-$(PYTHON_HOST_ENV)
 DOCKER_DEFAULT_VAR=./var-docker/$(DOCKER_DEFAULT)
 DOCKER_OS_DEFAULT_VAR=./var-docker/$(DOCKER_OS_DEFAULT)
 export DOCKER_BRANCH_TAG=$(subst /,-,$(VCS_BRANCH))
+DOCKER_DEFAULT_TAG=$(DOCKER_DEFAULT)-$(DOCKER_BRANCH_TAG)
 DOCKER_REGISTRIES=DOCKER
 export DOCKER_REGISTRY=$(firstword $(DOCKER_REGISTRIES))
 DOCKER_IMAGE_DOCKER=$(DOCKER_NAMESPACE)/$(PROJECT_NAME)
@@ -241,6 +244,8 @@ ifeq ($(DOCKER_VARIANT),$(DOCKER_VARIANT_HOST))
 TOX_BUILD_PREREQS=./var-docker/$(DOCKER_VARIANT_HOST)/log/requirements/build.txt.log
 endif
 TEST_CODE_PREREQS=./var/log/build-pkgs.log
+
+APT_LOCK_FILES=$(wildcard ./apt/*-lock.txt)
 
 # Run Python tools in isolated environments managed by Tox:
 # Values used to run Tox:
@@ -286,6 +291,9 @@ export PYPI_PASSWORD
 TEST_PYPI_PASSWORD?=
 export TEST_PYPI_PASSWORD
 
+# Variables related to tools managed by `./*compose*.yml`:
+DOCKER_COMPOSE_UPGRADE=false
+
 # https://www.sphinx-doc.org/en/master/usage/builders/index.html
 # Run these Sphinx builders to test the correctness of the documentation:
 # <!--alex disable gals-man-->
@@ -293,6 +301,7 @@ DOCS_SPHINX_BUILDERS=html dirhtml singlehtml htmlhelp qthelp epub applehelp late
     texinfo text gettext linkcheck xml pseudoxml
 DOCS_SPHINX_ALL_FORMATS=$(DOCS_SPHINX_BUILDERS) devhelp pdf info
 # <!--alex enable gals-man-->
+DOCS_SPHINX_BUILD_OPTS=
 # These builders report false warnings or failures:
 
 # Override variable values if present in `./.env` and if not overridden on the
@@ -386,7 +395,7 @@ $(DOCS_SPHINX_BUILDERS:%=build-docs-%): ./.tox/$(PYTHON_HOST_ENV)/.tox-info.json
 build-docs-pdf: build-docs-latex
 # TODO: Switch to a TeX Live container for SVG support.
 	$(MAKE) -C "./build/docs/$(<:build-docs-%=%)/" \
-	        LATEXMKOPTS="-f -interaction=nonstopmode" all-pdf || true
+	    LATEXMKOPTS="-f -interaction=nonstopmode" all-pdf
 .PHONY: build-docs-info
 ## Render the Texinfo documentation into a `*.info` file.
 build-docs-info: build-docs-texinfo
@@ -429,7 +438,7 @@ $(foreach variant,$(DOCKER_VARIANTS),$(eval \
 .PHONY: build-docker-tags
 ## Print the list of tags for this image variant in all registries.
 build-docker-tags: ./.tox/build/.tox-info.json
-	$(MAKE) --quiet --no-print-directory --debug=none \
+	MAKEFLAGS="" DEBUG="false" $(MAKE) --quiet --no-print-directory \
 	    $(DOCKER_REGISTRIES:%=build-docker-tags-%)
 
 .PHONY: $(DOCKER_REGISTRIES:%=build-docker-tags-%)
@@ -523,7 +532,8 @@ endif
 ifneq ($(DOCKER_BUILD_TARGET),base)
 ifneq ($(DOCKER_BUILD_TARGET),bootstrap)
 	for image_tag in $$(
-	    $(MAKE) --quiet --no-print-directory --debug=none build-docker-tags
+	    MAKEFLAGS="" DEBUG="false" $(MAKE) --quiet --no-print-directory \
+	        build-docker-tags
 	)
 	do
 	    docker_build_args+=" --tag $${image_tag}"
@@ -533,6 +543,7 @@ endif
 # https://github.com/moby/moby/issues/39003#issuecomment-879441675
 	docker buildx build --progress plain $(DOCKER_BUILD_ARGS) \
 	    --build-arg BUILDKIT_INLINE_CACHE="1" \
+	    --build-arg DOCKER_BASE_DIGEST="$(DOCKER_BASE_DIGEST)" \
 	    --build-arg PYTHON_MINOR="$${PYTHON_MINOR}" \
 	    --build-arg PYTHON_ENV="$${PYTHON_ENV}" \
 	    --build-arg VERSION="$$(
@@ -598,7 +609,7 @@ test-lint-licenses: ./var/log/docker-compose-network.log
 test-lint-code: test-lint-code-prettier
 .PHONY: test-lint-code-prettier
 ## Lint source code for formatting with Prettier.
-test-lint-code-prettier: ./var/log/npm-install.log
+test-lint-code-prettier: ./var/log/npm-install.log ./var/log/build-pkgs.log
 	~/.nvm/nvm-exec npm run lint:prettier
 
 .PHONY: test-lint-docs
@@ -642,7 +653,7 @@ test-lint-prose: test-lint-prose-vale-markup test-lint-prose-vale-code \
 test-lint-prose-vale-markup: ./var/log/docker-compose-network.log
 # https://vale.sh/docs/topics/scoping/#formats
 	git ls-files -co --exclude-standard -z ':!docs/news*.rst' ':!LICENSES' \
-	    ':!styles/**' ':!requirements/**' |
+	    ':!styles/**' ':!requirements/**' ':!apt/*-lock.txt' |
 	    xargs -r -0 -t -- $(DOCKER_COMPOSE_RUN_CMD) vale
 .PHONY: test-lint-prose-vale-code
 ## Lint comment prose in all source code files tracked in VCS with Vale.
@@ -928,7 +939,7 @@ devel-format: ./var/log/docker-compose-network.log ./var/log/npm-install.log
 # Add license and copyright header to files missing them:
 	git ls-files -co --exclude-standard -z ':!*.license' ':!.reuse' ':!LICENSES' \
 	    ':!newsfragments/*' ':!docs/news*.rst' ':!styles/**' \
-	    ':!requirements/*/*.txt' |
+	    ':!requirements/*/*.txt' ':!apt/*-lock.txt' |
 	while read -d $$'\0'
 	do
 	    if ! (
@@ -960,10 +971,10 @@ devel-format-py: ./.tox/$(PYTHON_SUPPORTED_ENV)/.tox-info.json
 .PHONY: devel-upgrade
 ## Update requirements, dependencies, and other external versions tracked in VCS.
 devel-upgrade:
-	touch ./requirements/*.txt.in "./.env.in.~prereq~" "./.vale.ini" ./styles/*.ini
+	touch ./requirements/*.txt.in ./apt/*-lock.txt "./.env.in.~prereq~" "./.vale.ini" ./styles/*.ini
 	$(MAKE) PIP_COMPILE_ARGS="--upgrade" DOCKER_COMPOSE_UPGRADE=true \
 	    $(DOCKER_REQUIREMENTS_TARGETS) devel-upgrade-pre-commit devel-upgrade-js \
-	    "./var/log/vale-rule-levels.log"
+	    "./.env.~out~" devel-upgrade-apt "./var/log/vale-rule-levels.log"
 .PHONY: devel-upgrade-pre-commit
 ## Update VCS integration from remotes to the most recent tag.
 devel-upgrade-pre-commit: ./.tox/build/.tox-info.json
@@ -973,11 +984,14 @@ devel-upgrade-pre-commit: ./.tox/build/.tox-info.json
 devel-upgrade-js: ./var/log/npm-install.log
 	~/.nvm/nvm-exec npm update
 	~/.nvm/nvm-exec npm outdated
-.PHONY: devel-upgrade-docker
+.PHONY: devel-upgrade-compose
 ## Update the container images of development tools.
-devel-upgrade-docker: $(HOST_TARGET_DOCKER)
+devel-upgrade-compose: $(HOST_TARGET_DOCKER)
 	touch "./.env.in.~prereq~"
 	$(MAKE) DOCKER_COMPOSE_UPGRADE=true "./.env.~out~"
+.PHONY: devel-upgrade-apt
+## Update the versions of APT packages installed into the container image:
+devel-upgrade-apt: $(APT_LOCK_FILES)
 
 .PHONY: devel-upgrade-branch
 ## Reset an upgrade branch, commit upgraded dependencies on it, and push for review.
@@ -990,7 +1004,7 @@ devel-upgrade-branch: ./var/log/git-fetch.log test-clean
 	    exit
 	fi
 # Only add changes related to the upgrades:
-	git add --update '.env.in' './requirements/*/*.txt' \
+	git add --update '.env.in' './requirements/*/*.txt' './apt/*-lock.txt' \
 	    "./.pre-commit-config.yaml" "./package-lock.json" "./.vale.ini"
 	git add "./styles/"
 # Commit the upgrade changes
@@ -1136,10 +1150,21 @@ $(foreach os,$(DOCKER_OSES),$(foreach language,$(DOCKER_LANGUAGES),\
     $(foreach basename,$(PYTHON_REQUIREMENTS_BASENAMES),\
     $(eval $(call build_docker_requirements_template,$(os),$(language),$(basename))))))
 
+# Lock installed operating system package versions for reproducible image builds:
+define devel_upgrade_apt_template=
+$(1): ./var-docker/$(DOCKER_DEFAULT)/log/build-$(1:./apt/%-lock.txt=%).log
+	docker run --rm --entrypoint "dpkg-query" \
+	    $$(DOCKER_IMAGE):$(1:./apt/%-lock.txt=%)-$$(DOCKER_DEFAULT_TAG) \
+	    -f='$$$${binary:Package}=$$$${Version}\n' -W >"$$(@)"
+endef
+$(foreach lock_file,$(APT_LOCK_FILES),\
+    $(eval $(call devel_upgrade_apt_template,$(lock_file))))
+
 # Build Docker container images:
 # Build the base layer common to both published images:
 define build_docker_base_template=
-./var-docker/$(1)-$(2)/log/build-base.log: ./Dockerfile ./bin/entrypoint.sh \
+./var-docker/$(1)-$(2)/log/build-base.log: \
+		./Dockerfile ./container/usr/local/bin/entrypoint.sh \
 		./.tox/build/.tox-info.json \
 		$$(HOME)/.local/state/docker-multi-platform/log/host-install.log \
 		./var/log/docker-login-DOCKER.log \
@@ -1231,9 +1256,9 @@ $(HOME)/.local/state/docker-multi-platform/log/host-install.log:
 	$(MAKE) "$(HOST_TARGET_DOCKER)" "./.env.~out~"
 	mkdir -pv "$(dir $(@))"
 # Workaround broken interactive session detection:
-	docker compose pull --quiet "vale" | tee -a "$(@)"
+	docker compose pull --quiet "vale"
 # Create the Docker compose network a single time under parallel make:
-	$(DOCKER_COMPOSE_RUN_CMD) --entrypoint "true" vale | tee -a "$(@)"
+	$(DOCKER_COMPOSE_RUN_CMD) --entrypoint "date" vale | tee -a "$(@)"
 # Create any mount points for bind volumes that `# dockerd` shouldn't or can't create,
 # such as directory bind volumes that root shouldn't own by or file bind volumes that `#
 # dockerd` shouldn't create as directories:
@@ -1245,7 +1270,7 @@ $(HOME)/.local/state/docker-multi-platform/log/host-install.log:
 	touch "$(@)"
 ./.env.in: ./.env.in.~prereq~
 ifeq ($(DOCKER_COMPOSE_UPGRADE),true)
-# Define the image tag to track in `./docker-compose*.yml` in the default values for the
+# Define the image tag to track in `./compose*.yml` in the default values for the
 # `${DOCKER_*_DIGEST}` environment variables and track the locked/frozen image digests
 # in `./.env.in` in VCS:
 #

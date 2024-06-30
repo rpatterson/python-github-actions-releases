@@ -2,16 +2,41 @@
 #
 # SPDX-License-Identifier: MIT
 
+# Common configuration shared between services:
+
+x-volume-checkout-service: &volume-checkout-service
+  type: "volume"
+  source: "checkout"
+  target: "/usr/local/src/project-structure"
+
+x-service: &service
+  user: "${PUID:-1000}:${PGID:-${PUID:-1000}}"
+  environment:
+    TZ: "${TZ:-Etc/UTC}"
+  volumes:
+    - <<: *volume-checkout-service
+  working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
+
+x-service-linter: &service-linter
+  <<: *service
+  profiles:
+    - "lint"
+
+x-service-releaser: &service-releaser
+  <<: *service
+  profiles:
+    - "release"
+
 # Override `$ docker compose` configuration for development or testing here in this
 # repository checkout. Put everything used outside this checkout in
-# `./docker-compose.yml`.
+# `./compose.yml`.
 services:
   # Configuration specific to development:
   project-structure:
     image: "${DOCKER_NAMESPACE:-merpatterson}/project-structure\
       :user-${DOCKER_VARIANT:-debian-py312}-${DOCKER_BRANCH_TAG:-develop}"
     container_name: "project-structure-checkout"
-    build:
+    build: &service-build
       context: "./"
       target: "user"
       args:
@@ -28,19 +53,17 @@ services:
 
   # Container for use by developers:
   project-structure-devel:
+    extends:
+      file: "./compose.yml"
+      service: "project-structure"
     image: "${DOCKER_NAMESPACE:-merpatterson}/project-structure\
       :devel-${DOCKER_VARIANT:-debian-py312}-${DOCKER_BRANCH_TAG:-develop}"
     container_name: "project-structure-devel"
     profiles:
       - "devel"
     build:
-      context: "./"
+      <<: *service-build
       target: "devel"
-      args:
-        BUILDKIT_INLINE_CACHE: "1"
-        PYTHON_MINOR: "${PYTHON_MINOR:-3.12}"
-        PYTHON_ENV: "${PYTHON_ENV:-py312}"
-        VERSION: "${VERSION:-}"
       cache_from:
         - "${DOCKER_NAMESPACE:-merpatterson}/project-structure\
           :devel-${DOCKER_VARIANT:-debian-py312}-${DOCKER_BRANCH_TAG:-develop}"
@@ -48,34 +71,16 @@ services:
       # Continue parallel make inside the container:
       MAKEFLAGS: "${MAKEFLAGS:-}"
       MAKE_RUN_UUID: "${MAKE_RUN_UUID:-}"
-      # Match the time zone of the host through `./.env`:
-      TZ: "${TZ:-Etc/UTC}"
-      # Make the runtime user configurable in `./.env`:
-      PUID: "${PUID:-1000}"
-      PGID: "${PGID:-${PUID:-1000}}"
       # Variables from the environment to pass through into the container:
       CI: "${CI:-false}"
       # DEBUG: "true"
     volumes:
       # Reflect local changes inside the container:
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/bin/entrypoint.sh\
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/container/usr/local/bin/entrypoint.sh\
         :/usr/local/bin/entrypoint.sh"
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-      # Preserve user configuration, data, and caches between containers and variants:
-      - type: "volume"
-        source: "home_config"
-        target: "/home/project-structure/.config"
-      - type: "volume"
-        source: "home_local_share"
-        target: "/home/project-structure/.local/share"
-      - type: "volume"
-        source: "home_cache"
-        target: "/home/project-structure/.cache"
-      # Preserve shell history inside containers, requires `$ touch
-      # ./home/.bash_history`:
-      - "./home/.bash_history:/home/project-structure/.bash_history"
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/container/usr/local/bin/healthcheck.sh\
+        :/usr/local/bin/healthcheck.sh"
+      - <<: *volume-checkout-service
       # Avoid any clashes between image variants and the local host at both build and
       # runtime:
       - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/var-docker/${DOCKER_VARIANT:-debian-py312}\
@@ -88,64 +93,37 @@ services:
         /src/project_structure.egg-info/"
     working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
 
+  base:
+    <<: *service
+    image: "docker.io/buildpack-deps${DOCKER_BASE_DIGEST:-:stable}"
+    profiles:
+      - "devel"
+
+  reuse:
+    <<: *service-linter
+    image: "docker.io/fsfe/reuse${DOCKER_REUSE_DIGEST:-:latest-debian}"
+    command: >-
+      lint
+
   # https://github.com/hadolint/hadolint#how-to-use
   hadolint:
+    <<: *service-linter
     # For this and other development tools in container images, define the image tag to
     # follow when upgrading as the default and `./.env` controls the specific digest
     # used currently:
     image: "ghcr.io/hadolint/hadolint${DOCKER_HADOLINT_DIGEST:-:latest-debian}"
-    profiles:
-      - "lint"
-    environment:
-      TZ: "${TZ:-Etc/UTC}"
-    volumes:
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
-      hadolint "./build-host/Dockerfile"
-
-  reuse:
-    image: "docker.io/fsfe/reuse${DOCKER_REUSE_DIGEST:-:latest-debian}"
-    profiles:
-      - "lint"
-    user: "${PUID:-1000}:${PGID:-${PUID:-1000}}"
-    environment:
-      TZ: "${TZ:-Etc/UTC}"
-    volumes:
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
-    command: >-
-      lint
+      hadolint "./Dockerfile" "./build-host/Dockerfile"
 
   vale:
+    <<: *service-linter
     image: "docker.io/jdkato/vale${DOCKER_VALE_DIGEST:-:latest}"
-    profiles:
-      - "lint"
-    user: "${PUID:-1000}:${PGID:-${PUID:-1000}}"
-    environment:
-      TZ: "${TZ:-Etc/UTC}"
-    volumes:
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       .
 
   pandoc:
+    <<: *service-releaser
     image: "docker.io/pandoc/core${DOCKER_PANDOC_DIGEST:-:latest-ubuntu}"
-    profiles:
-      - "release"
-    user: "${PUID:-1000}:${PGID:-${PUID:-1000}}"
-    volumes:
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     entrypoint: "ash"
     # Strip reStructuredText directives unsupported in Markdown before converting, for
     # example table of contents, and converted Markdown that isn't widely supported, for
@@ -157,43 +135,31 @@ services:
       '
 
   docker-pushrm:
+    <<: *service-releaser
     image: "chko/docker-pushrm${DOCKER_DOCKER_PUSHRM_DIGEST:-:latest}"
     depends_on:
       pandoc:
         condition: "service_completed_successfully"
-    profiles:
-      - "release"
     environment:
-      TZ: "${TZ:-Etc/UTC}"
       DOCKER_USER: "${DOCKER_USER:-}"
       DOCKER_PASS: "${DOCKER_PASS:-}"
-    volumes:
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     command: >-
       --file "./var/README.md"
       --short "Project structure foundation or template"
       --debug "${DOCKER_USER:-}/project-structure"
 
   gitlab-release-cli:
+    <<: *service-releaser
     image: "\
       registry.gitlab.com/gitlab-org/release-cli\
       ${DOCKER_GITLAB_RELEASE_CLI_DIGEST:-:latest}"
-    profiles:
-      - "release"
     environment:
       CI_JOB_TOKEN: "${CI_JOB_TOKEN:-}"
-    volumes:
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
 
   ## Containers for simulating CI/CD:
 
   build-host:
+    <<: *service
     image: "${DOCKER_NAMESPACE:-merpatterson}/project-structure:build-host"
     profiles:
       - "ci"
@@ -207,12 +173,12 @@ services:
     privileged: true
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - type: "volume"
-        source: "checkout"
-        target: "/usr/local/src/project-structure"
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/init-job.sh\
+      - <<: *volume-checkout-service
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/container\
+        /usr/local/bin/init-job.sh\
         :/usr/local/bin/init-job.sh"
-      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/bin/entrypoint.sh\
+      - "${CHECKOUT_DIR:-.}${WORKTREE_REL:-}/build-host/container\
+        /usr/local/bin/entrypoint.sh\
         :/usr/local/bin/entrypoint.sh"
       # Share local authentication inside the container:
       - "~/.ssh/:/home/runner/.ssh/"
@@ -221,10 +187,8 @@ services:
       - "~/.gnupg/:/home/runner/.gnupg/"
       - "/run/user/${PUID:-1000}/gnupg/S.gpg-agent:/home/runner/.gnupg/S.gpg-agent"
       - "~/.docker/:/home/runner/.docker/"
-    working_dir: "/usr/local/src/project-structure${WORKTREE_REL:-}"
     env_file: "./.env"
     environment:
-      TZ: "${TZ:-Etc/UTC}"
       PUID: "${PUID:-1000}"
       PGID: "${DOCKER_GID:-${PGID:-${PUID:-1000}}}"
       SSH_AUTH_SOCK: "${SSH_AUTH_SOCK:-/run/user/${PUID:-1000}/ssh/agent.socket}"
@@ -232,6 +196,7 @@ services:
       CHECKOUT_DIR: "${CHECKOUT_DIR:-.}"
       WORKTREE_REL: "${WORKTREE_REL:-}"
       # DEBUG: "true"
+    user: "0:0"
     command: >-
       make -j -O release-all
 

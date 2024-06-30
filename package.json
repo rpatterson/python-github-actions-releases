@@ -8,8 +8,8 @@
     "lint:code": "npm run lint:prettier",
     "lint:prettier": "prettier --check './'",
     "lint:prose": "npm run lint:write-good && npm run lint:alex",
-    "lint:write-good": "git ls-files -co --exclude-standard -z ':!LICENSES' ':!styles/**' ':!*.png' ':!requirements/**' ':!package-lock.json' | xargs -r -0 -t -- write-good --no-weasel --no-adverb --no-illusion --no-tooWordy",
-    "lint:alex": "git ls-files -co --exclude-standard -z ':!.gitignore' ':!**/.gitignore' ':!LICENSES' ':!styles/**' ':!*.license' ':!docs/conf.py' ':!*.png' ':!requirements/**' ':!package-lock.json' | xargs -r -0 -t -- alex",
+    "lint:write-good": "git ls-files -co --exclude-standard -z ':!LICENSES' ':!styles/**' ':!*.png' ':!requirements/**' ':!apt/*-lock.txt' ':!package-lock.json' | xargs -r -0 -t -- write-good --no-weasel --no-adverb --no-illusion --no-tooWordy",
+    "lint:alex": "git ls-files -co --exclude-standard -z ':!.gitignore' ':!**/.gitignore' ':!LICENSES' ':!styles/**' ':!*.license' ':!docs/conf.py' ':!*.png' ':!requirements/**' ':!apt/*-lock.txt' ':!package-lock.json' | xargs -r -0 -t -- alex",
     "format": "prettier --write './'"
   },
   "keywords": [

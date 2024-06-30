@@ -15,35 +15,6 @@ TEMPLATE: clear items and add items for your project.
 Required
 ****************************************************************************************
 
-#. ``docker``: Add ``HEALTHCHECK`` template to ``./Dockerfile``.
-
-#. ``docker``: Missing ``LABEL`` tag: ``"org.opencontainers.image.base.name":
-   "docker.io/library/python:"``
-
-#. ``docker``: Debug why the ``*-devel`` image's expensive ``# apt-get install ...``
-   layer being rebuilt so often. Maybe it's because the ``COPY [ "./bin/entrypoint.sh",
-   "/usr/local/bin/" ]`` layer is part of the ``base`` image. The approach to layers
-   might need rethinking altogether. Maybe cheap layers such as ``ENV`` and ``LABEL``,
-   maybe even ``ARG`` should be before expensive layers. Maybe it's worth even repeating
-   some cheap layers between the ``user`` and ``devel`` images to avoid them triggering
-   a rebuild of expensive layers.
-
-#. ``base``: Rename ``docker-compose*.yml`` files to `the newer canonical
-   <https://docs.docker.com/compose/compose-application-model/#the-compose-file>`_
-   ``compose*.yml`` names.
-
-#. ``docker``: Switch to the newer and more explicit `'include:' section
-   <https://docs.docker.com/compose/compose-file/14-include/>`_ in the YAML.
-
-#. ``base``: Cleanup Docker Compose repetition with `YAML anchors
-   <https://docs.docker.com/compose/compose-file/10-fragments/>`_ and `compose
-   extensions <https://docs.docker.com/compose/compose-file/11-extension/>`_.
-
-#. ``docker``: Maybe `use 'extends:'
-   <https://docs.docker.com/compose/multiple-compose-files/extends/>`_ for the
-   ``*-devel`` service? When should the configuration use ``extends:`` and when should
-   it use YAML anchors?
-
 #. ``base``: Add an Open Collective badge.
 
 #. ``(js|ts|etc.)``: Restore `general and module Sphinx indexes
@@ -125,12 +96,12 @@ Nice to have
    to some form of filesystem archive. This means following runs of the image tag might
    use a different image than the one built locally. Someone else could have pushed
    another build to the registry between the push and following pull. Even worse,
-   changing the ``platform: ...`` in ``./docker-compose*.yml`` requires a ``$ docker
+   changing the ``platform: ...`` in ``./compose*.yml`` requires a ``$ docker
    compose pull ...`` to switch the image. This means pulling again and again some time
    after the push increasingly the likelihood of pulling an image other than the one
    built locally. This leaves a couple options. Parse the manifest digest from the build
    output and then use that to retrieve the digests for each platform's image and then
-   use those digests in ``./docker-compose*.yml``. Or output the multi-platform image to
+   use those digests in ``./compose*.yml``. Or output the multi-platform image to
    one of the local filesystem formats, figure how to import from there and do a similar
    dance to retrieve and use the digests. This would be fragile and would take a lot of
    work that is likely wasted effort when Docker or someone else provides a better

@@ -86,7 +86,7 @@ autoapi_options = [
 autoapi_keep_files = True
 
 # -- Other formats -----------------------------------------------------------
-latex_logo = './_static/logo.svg'
+latex_logo = './_static/logo.png'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-applehelp_bundle_id
 applehelp_bundle_id = 'net.rpatterson.project-structure'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-applehelp_disable_external_tools

@@ -1,20 +1,20 @@
 #!/bin/bash
+#
+# Add files tracked in VCS for any bind volume paths that have none.
+#
+# Useful so that `# dockerd` doesn't create them as `root`.
 
 # SPDX-FileCopyrightText: 2023 Ross Patterson <me@rpatterson.net>
 #
 # SPDX-License-Identifier: MIT
 
-# Add files tracked in VCS for any bind volume paths that have none.
-#
-# Useful so that `# dockerd` doesn't create them as `root`.
-
 set -eu -o pipefail
 shopt -s inherit_errexit
+export PS4='+$(basename "${0}"):${LINENO}+'
 if test "${DEBUG:=false}" = "true"
 then
     # Echo commands for easier debugging
     set -x
-    PS4='$0:$LINENO+'
 fi
 
 
@@ -24,15 +24,20 @@ main() {
     target_prefix="${1}"
     shift
 
-    docker_services="$(sed -nE 's#^  ([^ :]+): *$#\1#p' ./docker-compose*.yml)"
+    compose_args="docker compose $(
+        for profile in $(docker compose config --profiles)
+	do
+	    echo "--profile ${profile}"
+	done
+    )"
     if test "${DEBUG}" = "true"
     then
-	docker compose config ${docker_services} >&2
+	${compose_args} config >&2
     fi
     (
-	docker compose config ${docker_services} |
+	${compose_args} config |
 	    sed -nE -e "s#^ *source: *${source_prefix}/(.+)#\1#p" &&
-	    docker compose config ${docker_services} |
+	    ${compose_args} config |
 	        sed -nE -e "s#^ *target: *${target_prefix}/(.+)#\1#p"
     ) | sort | uniq | while read "docker_volume_path"
     do

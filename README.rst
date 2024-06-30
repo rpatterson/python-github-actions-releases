@@ -234,7 +234,7 @@ Docker container image
 ========================================================================================
 
 The recommended way to use the container image is by using `Docker Compose`_. See `the
-example ./docker-compose.yml file`_. Write your configuration and run the container::
+example ./compose.yml file`_. Write your configuration and run the container::
 
   $ docker compose up
 
@@ -307,8 +307,8 @@ References
 .. _pipx: https://pipx.pypa.io/stable/installation/#installing-pipx
 
 .. _`Docker Compose`: https://docs.docker.com/compose/
-.. _`the example ./docker-compose.yml file`:
-   https://gitlab.com/rpatterson/project-structure/-/blob/main/docker-compose.yml
+.. _`the example ./compose.yml file`:
+   https://gitlab.com/rpatterson/project-structure/-/blob/main/compose.yml
 .. _the Docker image: https://hub.docker.com/r/merpatterson/project-structure
 
 .. _`GitLab hosts this project`:

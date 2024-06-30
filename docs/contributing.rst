@@ -62,11 +62,11 @@ issues, maintainers merge ``develop`` into ``main`` and publish final releases::
 
   $ make release
 
-The ``./requirements/*/*.txt`` and ``./package-lock.json`` files lock versions of
-dependencies and development tools for reproducibility. The `Makefile`_ updates those
-when dependencies change in the ``./requirements/*.txt.in`` and
-``./package.json``. Other versions might get updated when maintainers publish newer
-versions. Maintainers can also update all dependencies to current versions::
+The ``./requirements/*/*.txt``, ``./apt/*-lock.txt``, and ``./package-lock.json`` files
+lock versions of dependencies and development tools for reproducibility. The `Makefile`_
+updates those when dependencies change. Other versions might get updated when
+maintainers publish newer versions. Maintainers can also update all dependencies to
+current versions::
 
   $ make devel-upgrade
 
