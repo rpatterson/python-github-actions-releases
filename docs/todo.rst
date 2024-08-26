@@ -58,3 +58,12 @@ Nice to have
 #. ``base``: Add `a badge
    <https://repology.org/project/python:project-structure/badges>`_ for projects that
    publish packages to more than one repository.
+
+#. ``$ git grep -i -e todo``:
+
+   The above are the most important improvements that Prunerr definitely needs. See ``#
+   TODO: ...`` comments throughout the source for other smaller, potential improvements.
+
+#. :Lint: Resolve ignored linter failures::
+
+            $ git grep -i -e 'alex disable hooks|hadolint ignore|pylint: disable|type: ignore' -- '*.py'
