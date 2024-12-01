@@ -36,7 +36,7 @@ High priority
 
 #. :Docs:
 
-   Docs benefit most from fresh eyes. If you find anything confusing, ask for help. When
+   Docs benefit most from fresh eyes. If you find anything unclear, ask for help. When
    you understand better, contribute changes to the docs to help others.
 
 
