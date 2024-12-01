@@ -58,7 +58,10 @@ linkcheck_anchors_ignore = [
     "^/#.+:.+",
 ]
 linkcheck_ignore = [
+    # Sites that are down too often, too many false failures:
     "https://liberapay.com/.*",
+    "https://(.+\.|)reuse.software/,*",
+    # Links to pages that require an authenticated user:
     "https://gitlab.com/.*/(new|edit)",
     "https://github.com/.*/settings",
 # TODO: Remove when Repology's PyPI support is stable. Currently it thinks the package
