@@ -361,9 +361,12 @@ test-lint-prose-vale-misc: ./var/log/docker-compose-network.log
 	git ls-files -co --exclude-standard -z | grep -Ez '^[^.]+$$' |
 	    while read -d $$'\0'
 	    do
-	        cat "$${REPLY}" |
-	            docker compose run --rm -T vale --config="./styles/code.ini" \
-	                --ext=".pl"
+	        if test -f "$${REPLY}"
+	        then
+	            cat "$${REPLY}" |
+	                docker compose run --rm -T vale --config="./styles/code.ini" \
+	                    --ext=".pl"
+	        fi
 	    done
 .PHONY: test-lint-prose-proselint
 ## Lint prose in all markup files tracked in VCS with proselint.
