@@ -46,11 +46,6 @@ Nice to have
 
 #. :Release:
 
-    When doing a final release and there are no ``./newsfragments/*`` files, add a new
-    fragment saying something such as "See the following pre-releases for this version."
-
-#. :Release:
-
     `Homebrew formula and badge <https://formulae.brew.sh/formula/commitizen>`_
 
 #. :Docs:
