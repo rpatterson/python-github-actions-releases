@@ -469,6 +469,7 @@ endif
 ## Bump the package version if conventional commits require a release.
 release-bump: ./var/log/git-fetch.log ./.tox/build/.tox-info.json \
 		./var/log/npm-install.log
+# Fail if there are existing uncommitted changes:
 	if ! git diff --cached --exit-code
 	then
 	    set +x
@@ -482,36 +483,36 @@ endif
 # Update the local branch to the forthcoming version bump commit:
 	git switch -C "$(VCS_BRANCH)" "$$(git rev-parse HEAD)"
 	exit_code=0
+# On the `main` branch, make a final release from the last pre-release regardless of
+# whether any commits on `main` require a release:
 	if test "$(VCS_BRANCH)" = "main" &&
 	    tox exec -e "build" -- python ./bin/get-base-version.py $$(
 	        tox exec -e "build" -qq -- cz version --project
 	    )
 	then
-# Make a final release from the last pre-release:
 	    true
-	else
 # Do the conventional commits require a release?:
+	else
 	    tox exec -e "build" -- python ./bin/cz-check-bump.py || exit_code=$$?
 	    if (( $$exit_code == 3 || $$exit_code == 21 ))
 	    then
-# No commits require a release:
+# No commits require a release, proceed without a bump commit:
 	        exit
 	    elif (( $$exit_code != 0 ))
 	    then
 	        exit $$exit_code
 	    fi
 	fi
-# Collect the versions involved in this release according to conventional commits:
+# Collect the version involved in this release according to conventional commits:
 	cz_bump_args="--check-consistency --no-verify"
 ifneq ($(VCS_BRANCH),main)
 	cz_bump_args+=" --prerelease beta"
 endif
-# Build and stage the release notes:
 	next_version=$$(
 	    tox exec -e "build" -qq -- cz bump $${cz_bump_args} --yes --dry-run |
 	    sed -nE 's|.* ([^ ]+) *→ *([^ ]+).*|\2|p;q'
 	) || true
-# Assemble the release notes for this next version:
+# Build and stage the release notes for this next version:
 	tox exec -e "build" -qq -- \
 	    towncrier build --version "$${next_version}" --draft --yes \
 	    >"./docs/news-version.rst"
@@ -520,14 +521,15 @@ endif
 # Bump the version in the NPM package metadata:
 	~/.nvm/nvm-exec npm --no-git-tag-version version "$${next_version}"
 	git add -- "./package*.json"
-# Increment the version in VCS
+# Increment the version in VCS:
 	tox exec -e "build" -- cz bump $${cz_bump_args}
 ifeq ($(VCS_BRANCH),main)
-# Merge the bumped version back into `develop`:
+# Merge the bumped version back into `develop` for final releases on `main`:
 	$(MAKE) VCS_BRANCH="main" VCS_MERGE_BRANCH="develop" \
 	    VCS_REMOTE="$(VCS_COMPARE_REMOTE)" VCS_MERGE_BRANCH="develop" devel-merge
 	git switch -C "$(VCS_BRANCH)" "$$(git rev-parse HEAD)"
 endif
+# Fail if this process left uncommitted changes:
 	$(MAKE) test-clean
 
 .PHONY: release-all
