@@ -55,15 +55,26 @@ def main(args=None):  # pylint: disable=missing-function-docstring
             continue
         for style in styles_value.split(","):
             style = style.strip()
-            for rule_path in (styles_dir / style).glob("*.[yY][mM][lL]"):
+            if style == "Vale":
+                # TODO: Include the styles built into Vale itself:
+                continue
+            rules = {
+                f"{style}.{rule_path.stem}": rule_path
+                for rule_path in (styles_dir / style).glob("*.[yY][mM][lL]")
+            }
+            # Remove rules that a no longer in the style:
+            for rule_name in format_settings:
+                if rule_name.startswith(f"{style}.") and rule_name not in rules:
+                    del format_settings[rule_name]
+            # Specify the default level for rules not already in the format section:
+            for rule_name, rule_path in rules.items():
                 with rule_path.open(encoding="utf-8") as rule_config_opened:
                     rule_config = yaml.safe_load(rule_config_opened)
-                style_rule = f"{style}.{rule_path.stem}"
                 if (
-                    style_rule not in format_settings
+                    rule_name not in format_settings
                     and rule_config.get("level", "warning") != parsed_args.level
                 ):
-                    format_settings[style_rule] = parsed_args.level
+                    format_settings[rule_name] = parsed_args.level
 
     output = parsed_args.output
     if output is None:

@@ -787,6 +787,12 @@ endif
 # Update style rule definitions from the remotes:
 ./styles/RedHat/meta.json: ./var/log/docker-compose-network.log ./.vale.ini \
 		./styles/code.ini
+	sed -nE 's|^ *Packages *= *(.+) *|\1|p' "./.vale.ini" "./styles/code.ini" |
+	    tr -s "," "\n" | sed -nE 's| *([^ ]+.+[^ ]+) *|\1|p' | sort | uniq |
+	    while read "package"
+	    do
+	        rm -r "./styles/$${package}/"
+	    done
 	docker compose run --rm -T vale sync
 	docker compose run --rm -T vale sync --config="./styles/code.ini"
 
