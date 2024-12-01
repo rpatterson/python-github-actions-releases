@@ -571,15 +571,23 @@ devel-format: ./var/log/docker-compose-network.log ./var/log/npm-install.log
 
 .PHONY: devel-upgrade
 ## Update requirements, dependencies, and other external versions tracked in VCS.
-devel-upgrade:
-	touch ./requirements/*.txt.in "./.env.in.~prereq~" "./.vale.ini" ./styles/*.ini
-	$(MAKE) PIP_COMPILE_ARGS="--upgrade" DOCKER_COMPOSE_UPGRADE=true \
-	    "./requirements/$(PYTHON_HOST_ENV)/build.txt" devel-upgrade-pre-commit \
-	    devel-upgrade-js "./.env.~out~" "./var/log/vale-rule-levels.log"
+devel-upgrade: \
+		devel-upgrade-pre-commit devel-upgrade-py devel-upgrade-js \
+		devel-upgrade-docker devel-upgrade-vale
+.PHONY: devel-upgrade-py
+## Update tools implemented in Python.
+devel-upgrade-py:
+	touch ./requirements/*.txt.in
+	$(MAKE) PIP_COMPILE_ARGS="--upgrade" "./.tox/build/.tox-info.json"
 .PHONY: devel-upgrade-pre-commit
 ## Update VCS integration from remotes to the most recent tag.
-devel-upgrade-pre-commit: ./.tox/build/.tox-info.json
+devel-upgrade-pre-commit: devel-upgrade-py
 	tox exec -e "build" -- pre-commit autoupdate
+.PHONY: devel-upgrade-vale
+## Update the container images of development tools.
+devel-upgrade-vale: devel-upgrade-py
+	touch "./.vale.ini" ./styles/*.ini
+	$(MAKE) "./var/log/vale-rule-levels.log"
 .PHONY: devel-upgrade-js
 ## Update tools implemented in JavaScript.
 devel-upgrade-js: ./var/log/npm-install.log
