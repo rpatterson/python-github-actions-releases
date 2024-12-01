@@ -19,6 +19,10 @@ Required
 
     Add an Open Collective badge.
 
+#. :Upgrade:
+
+    The ``devel-upgrade`` target doesn't add new Vale styles.
+
 #. :Docs:
 
     Restore `general and module Sphinx indexes
@@ -42,7 +46,8 @@ Nice to have
 
 #. :Release:
 
-    Better final release notes when nothing changed after the last pre-release.
+    When doing a final release and there are no ``./newsfragments/*`` files, add a new
+    fragment saying something such as "See the following pre-releases for this version."
 
 #. :Release:
 
